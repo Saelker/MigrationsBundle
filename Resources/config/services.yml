@@ -1,0 +1,4 @@
+services:
+#    saelker_migrations.example:
+#        class: Saelker\MigrationsBundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]
