@@ -12,7 +12,7 @@ class MigrationsManager
 	private $em;
 
 	/**
-	 * @var string[]
+	 * @var \string[]
 	 */
 	private $folders;
 
@@ -26,7 +26,7 @@ class MigrationsManager
 	}
 
 	/**
-	 * @param string $folder
+	 * @param \string $folder
 	 * @return $this
 	 */
 	public function addFolder($folder)
@@ -34,5 +34,13 @@ class MigrationsManager
 		$this->folders[] = $folder;
 
 		return $this;
+	}
+
+	/**
+	 * @return \string[]
+	 */
+	public function getFolders()
+	{
+		return $this->folders;
 	}
 }
