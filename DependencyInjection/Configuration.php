@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface
 
 		$rootNode
 			->children()
-				->arrayNode('folder')
+				->arrayNode('directories')
 					->prototype('scalar')->end()
 				->end()
 			->end();

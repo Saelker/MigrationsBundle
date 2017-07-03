@@ -1,0 +1,20 @@
+Saelker\MigrationsBundle\Entity\Migration:
+    type: entity
+    table: null
+    repositoryClass: Saelker\MigrationsBundle\Repository\MigrationRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        identifier:
+            type: string
+            length: 255
+        folder:
+            type: string
+            length: 255
+        createdAt:
+            type: datetime
+    lifecycleCallbacks: {  }

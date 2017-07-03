@@ -4,8 +4,9 @@ namespace Saelker\MigrationsBundle;
 
 use Doctrine\ORM\EntityManager;
 use Saelker\MigrationsBundle\Entity\Migration;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class MigrationsManager
 {
@@ -17,7 +18,7 @@ class MigrationsManager
 	/**
 	 * @var \string[]
 	 */
-	private $folders;
+	private $directories;
 
 	/**
 	 * MigrationsManager constructor.
@@ -29,12 +30,12 @@ class MigrationsManager
 	}
 
 	/**
-	 * @param \string $folder
+	 * @param \string $directory
 	 * @return $this
 	 */
-	public function addFolder($folder)
+	public function addDirectory($directory)
 	{
-		$this->folders[] = $folder;
+		$this->directories[] = $directory;
 
 		return $this;
 	}
@@ -42,38 +43,84 @@ class MigrationsManager
 	/**
 	 * @return \string[]
 	 */
-	public function getFolders()
+	public function getDirectories()
 	{
-		return $this->folders;
+		return $this->directories;
 	}
 
 	/**
+	 * @param SymfonyStyle $io
 	 * @return $this
 	 */
-	public function migrate()
+	public function migrate(SymfonyStyle $io)
 	{
 		$repo = $this->em->getRepository(Migration::class);
 
-		/** @var \string $folder */
-		foreach($this->getFolders() as $folder) {
+		$io->title('Starting migration, directories:');
+		$io->listing($this->getDirectories());
+
+		/** @var SplFileInfo $files */
+		$files = [];
+
+		foreach ($this->getDirectories() as $directory) {
 			// Check if folder exists
-			if (is_dir($folder)) {
+			if (is_dir($directory)) {
+
 				// Get Migration Files
 				// Get Last Identifier
 				// Reject Migrations Files
 				// Execute Migrations Files & Write migration entries
-				$lastIdentifier = $repo->getLatestIdentifier($folder);
+				$lastIdentifier = $repo->getLatestIdentifier($directory);
 
 				$finder = new Finder();
-				$finder->in($folder);
-				$finder->filter(function(\SplFileInfo $file) use ($lastIdentifier) {
-					if ($file->getBasename('.php') < $lastIdentifier) {
-						return false;
+				$finder->files()->in($directory);
+				$finder->filter(function (\SplFileInfo $file) use ($lastIdentifier) {
+					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) < $lastIdentifier || !$lastIdentifier)) {
+						return true;
 					}
+
+					return false;
 				});
+
+				foreach($finder as $file) {
+					$files[] = $file;
+				}
+			} else {
+				$io->error('Directory not found: ' . $directory);
+				return $this;
 			}
 		}
 
+		if ($files) {
+			// Execute migrations Files
+			$io->progressStart(count($files));
+
+			/** @var SplFileInfo $file */
+			foreach($files as $file) {
+				$io->progressAdvance(1);
+				$io->write("<info> - Importing file: " . $file->getBasename()."</info>");
+			}
+
+			$io->progressFinish();
+
+			$io->success('Finished, ' . count($files) . " files imported.");
+
+
+		} else {
+			$io->success('Everything is up to date.');
+		}
+
 		return $this;
+	}
+
+	/**
+	 * @param $basename
+	 * @return string
+	 */
+	private function getFileIdentifier($basename)
+	{
+		preg_match('/^.*_(\d*)/', $basename, $hits);
+
+		return !empty($hits) ? $hits[1] : false;
 	}
 }

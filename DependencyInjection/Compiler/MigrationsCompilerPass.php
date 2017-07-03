@@ -10,19 +10,19 @@ class MigrationsCompilerPass implements CompilerPassInterface
 	/**
 	 * @var
 	 */
-	private $folder;
+	private $directory;
 
 	/**
 	 * MigrationsCompilerPass constructor.
-	 * @param $folder
+	 * @param $directory
 	 */
-	public function __construct($folder)
+	public function __construct($directory)
 	{
-		$this->folder = $folder;
+		$this->directory = $directory;
 	}
 
 	public function process(ContainerBuilder $container)
 	{
-		$container->getDefinition('saelker.migrations_manager')->addMethodCall('addFolder', [$this->folder]);
+		$container->getDefinition('saelker.migrations_manager')->addMethodCall('addDirectory', [$this->directory]);
 	}
 }

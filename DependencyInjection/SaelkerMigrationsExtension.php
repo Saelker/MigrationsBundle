@@ -25,21 +25,21 @@ class SaelkerMigrationsExtension extends Extension
 		$loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 		$loader->load('services.yml');
 
-		if (array_key_exists('folder', $config)) {
-			$this->addFolders($config['folder'], $container);
+		if (array_key_exists('directories', $config)) {
+			$this->addDirectories($config['directories'], $container);
 		}
 	}
 
 	/**
-	 * @param $folders
+	 * @param $directories
 	 * @param ContainerBuilder $container
 	 */
-	private function addFolders($folders, ContainerBuilder $container)
+	private function addDirectories($directories, ContainerBuilder $container)
 	{
 		$manager = $container->getDefinition('saelker.migrations_manager');
 
-		foreach ($folders as $folder) {
-			$manager->addMethodCall('addFolder', [$folder]);
+		foreach ($directories as $directory) {
+			$manager->addMethodCall('addDirectory', [$directory]);
 		}
 	}
 }
