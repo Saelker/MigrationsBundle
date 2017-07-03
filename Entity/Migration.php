@@ -20,7 +20,7 @@ class Migration
 	/**
 	 * @var string
 	 */
-	private $folder;
+	private $directory;
 
 	/**
 	 * @var \DateTime
@@ -39,11 +39,16 @@ class Migration
 	}
 
 	/**
-	 * Set identifier
-	 *
+	 * @return string
+	 */
+	public function getIdentifier()
+	{
+		return $this->identifier;
+	}
+
+	/**
 	 * @param string $identifier
-	 *
-	 * @return Migration
+	 * @return $this
 	 */
 	public function setIdentifier($identifier)
 	{
@@ -53,61 +58,41 @@ class Migration
 	}
 
 	/**
-	 * Get identifier
-	 *
 	 * @return string
 	 */
-	public function getIdentifier()
+	public function getDirectory()
 	{
-		return $this->identifier;
+		return $this->directory;
 	}
 
 	/**
-	 * Set folder
-	 *
-	 * @param string $folder
-	 *
-	 * @return Migration
+	 * @param string $directory
+	 * @return $this
 	 */
-	public function setFolder($folder)
+	public function setDirectory($directory)
 	{
-		$this->folder = $folder;
+		$this->directory = $directory;
 
 		return $this;
 	}
 
 	/**
-	 * Get folder
-	 *
-	 * @return string
+	 * @return \DateTime
 	 */
-	public function getFolder()
+	public function getCreatedAt()
 	{
-		return $this->folder;
+		return $this->createdAt;
 	}
 
 	/**
-	 * Set createdAt
-	 *
 	 * @param \DateTime $createdAt
-	 *
-	 * @return Migration
+	 * @return $this
 	 */
 	public function setCreatedAt($createdAt)
 	{
 		$this->createdAt = $createdAt;
 
 		return $this;
-	}
-
-	/**
-	 * Get createdAt
-	 *
-	 * @return \DateTime
-	 */
-	public function getCreatedAt()
-	{
-		return $this->createdAt;
 	}
 }
 

@@ -12,7 +12,7 @@ Saelker\MigrationsBundle\Entity\Migration:
         identifier:
             type: string
             length: 255
-        folder:
+        directory:
             type: string
             length: 255
         createdAt:
