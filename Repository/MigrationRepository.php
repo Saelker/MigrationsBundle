@@ -11,17 +11,17 @@ namespace Saelker\MigrationsBundle\Repository;
 class MigrationRepository extends \Doctrine\ORM\EntityRepository
 {
 	/**
-	 * @param $folder
+	 * @param $directory
 	 * @return mixed
 	 */
-	public function getLatestIdentifier($folder)
+	public function getLatestIdentifier($directory)
 	{
 		return $this
 			->createQueryBuilder('m')
-			->andWhere('m.folder = :folder')
+			->andWhere('m.directory = :directory')
 			->setMaxResults(1)
 			->orderBy('m.identifier', 'DESC')
-			->setParameter('folder', $folder)
+			->setParameter('directory', $directory)
 			->getQuery()
 			->getOneOrNullResult();
 	}

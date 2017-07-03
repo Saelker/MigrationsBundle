@@ -4,9 +4,9 @@ namespace Saelker\MigrationsBundle;
 
 use Doctrine\ORM\EntityManager;
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Util\ImportFile;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 
 class MigrationsManager
 {
@@ -59,11 +59,11 @@ class MigrationsManager
 		$io->title('Starting migration, directories:');
 		$io->listing($this->getDirectories());
 
-		/** @var SplFileInfo $files */
+		/** @var ImportFile[] $files */
 		$files = [];
 
 		foreach ($this->getDirectories() as $directory) {
-			// Check if folder exists
+			// Check if directory exists
 			if (is_dir($directory)) {
 
 				// Get Migration Files
@@ -83,7 +83,7 @@ class MigrationsManager
 				});
 
 				foreach($finder as $file) {
-					$files[] = $file;
+					$files[] = new ImportFile($file, $this->em);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
@@ -95,10 +95,12 @@ class MigrationsManager
 			// Execute migrations Files
 			$io->progressStart(count($files));
 
-			/** @var SplFileInfo $file */
+			/** @var ImportFile $file */
 			foreach($files as $file) {
 				$io->progressAdvance(1);
-				$io->write("<info> - Importing file: " . $file->getBasename()."</info>");
+				$io->write("<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
+
+				$file->migrate();
 			}
 
 			$io->progressFinish();
