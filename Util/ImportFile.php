@@ -47,7 +47,7 @@ class ImportFile
 	public function migrate()
 	{
 		$instance = $this->getInstance();
-		$instance->up();
+		$instance->executeUp();
 
 		return $this;
 	}
