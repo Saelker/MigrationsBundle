@@ -93,7 +93,7 @@ class ImportFile
 	 */
 	public function getFileIdentifier()
 	{
-		preg_match('/^.*_(\d*)/', $this->file->getBasename(), $hits);
+		preg_match('/V_(\d*)_.*/', $this->file->getBasename(), $hits);
 
 		return !empty($hits) ? $hits[1] : false;
 	}

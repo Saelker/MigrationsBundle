@@ -75,7 +75,7 @@ class MigrationsManager
 				$finder = new Finder();
 				$finder->files()->in($directory);
 				$finder->filter(function (\SplFileInfo $file) use ($latestMigration) {
-					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier() || !$latestMigration)) {
+					if ($this->getFileIdentifier($file->getBasename()) && (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())) {
 						return true;
 					}
 
@@ -132,7 +132,7 @@ class MigrationsManager
 	 */
 	private function getFileIdentifier($basename)
 	{
-		preg_match('/^.*_(\d*)/', $basename, $hits);
+		preg_match('/V_(\d*)_.*/', $basename, $hits);
 
 		return !empty($hits) ? $hits[1] : false;
 	}
