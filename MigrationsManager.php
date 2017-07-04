@@ -70,12 +70,12 @@ class MigrationsManager
 				// Get Last Identifier
 				// Reject Migrations Files
 				// Execute Migrations Files & Write migration entries
-				$lastIdentifier = $repo->getLatestIdentifier($directory);
+				$latestMigration = $repo->getLatestMigration($directory);
 
 				$finder = new Finder();
 				$finder->files()->in($directory);
-				$finder->filter(function (\SplFileInfo $file) use ($lastIdentifier) {
-					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) < $lastIdentifier || !$lastIdentifier)) {
+				$finder->filter(function (\SplFileInfo $file) use ($latestMigration) {
+					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) < $latestMigration->getIdentifier() || !$latestMigration)) {
 						return true;
 					}
 
@@ -97,10 +97,23 @@ class MigrationsManager
 
 			/** @var ImportFile $file */
 			foreach($files as $file) {
+				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
 				$io->progressAdvance(1);
-				$io->write("<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
 
+				$io->writeln($file->getFile()->getPath());
+
+				// Start migration
 				$file->migrate();
+
+				// Generate DB Entry
+				$migration = new Migration();
+				$migration
+					->setDirectory($file->getFile()->getPath())
+					->setIdentifier($file->getFileIdentifier())
+					->setCreatedAt(new \DateTime());
+
+				$this->em->persist($migration);
+				$this->em->flush();
 			}
 
 			$io->progressFinish();

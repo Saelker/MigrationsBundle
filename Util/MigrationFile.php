@@ -14,7 +14,7 @@ abstract class MigrationFile
 	/**
 	 * @var SqlStatement[]
 	 */
-	private $sql;
+	private $sql = [];
 
 	/**
 	 * MigrationFile constructor.
@@ -33,7 +33,6 @@ abstract class MigrationFile
 
 		$this->up();
 		$this->executeSql();
-		// Excute SQL's
 
 		$this->postUp();
 
@@ -42,9 +41,10 @@ abstract class MigrationFile
 
 	/**
 	 * @param $sql
+	 * @param null $params
 	 * @return $this
 	 */
-	public function addSql($sql, $params)
+	public function addSql($sql, $params = null)
 	{
 		$this->sql[] = new SqlStatement($sql, $params);
 

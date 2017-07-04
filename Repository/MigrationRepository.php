@@ -2,6 +2,8 @@
 
 namespace Saelker\MigrationsBundle\Repository;
 
+use Saelker\MigrationsBundle\Entity\Migration;
+
 /**
  * MigrationRepository
  *
@@ -12,9 +14,9 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 {
 	/**
 	 * @param $directory
-	 * @return mixed
+	 * @return Migration
 	 */
-	public function getLatestIdentifier($directory)
+	public function getLatestMigration($directory)
 	{
 		return $this
 			->createQueryBuilder('m')

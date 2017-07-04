@@ -88,4 +88,14 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : false;
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getFileIdentifier()
+	{
+		preg_match('/^.*_(\d*)/', $this->file->getBasename(), $hits);
+
+		return !empty($hits) ? $hits[1] : false;
+	}
+
 }
