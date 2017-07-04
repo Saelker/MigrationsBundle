@@ -2,6 +2,9 @@ Saelker\MigrationsBundle\Entity\Migration:
     type: entity
     table: null
     repositoryClass: Saelker\MigrationsBundle\Repository\MigrationRepository
+    indexes:
+        directory_index:
+            columns: [ directory ]
     id:
         id:
             type: integer
