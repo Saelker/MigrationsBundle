@@ -25,12 +25,12 @@ class ImportFile
 	/**
 	 * ImportFile constructor.
 	 * @param SplFileInfo $file
-	 * @param EntityManager $em
+	 * @param EntityManager $entityManager
 	 */
-	public function __construct(SplFileInfo $file, EntityManager $em)
+	public function __construct(SplFileInfo $file, $entityManager)
 	{
 		$this->file = $file;
-		$this->em = $em;
+		$this->em = $entityManager;
 	}
 
 	/**

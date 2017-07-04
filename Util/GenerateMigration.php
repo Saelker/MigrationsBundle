@@ -9,8 +9,7 @@ class GenerateMigration
 	 * @var string
 	 */
 	private static $template =
-		'
-		<?php
+		'<?php
 
 namespace <namespace>;
 
@@ -57,6 +56,23 @@ class V_<identifier>_<description> extends MigrationFile
 		file_put_contents($path, $code);
 
 		return $path;
+	}
+
+	/**
+	 * @param $directory
+	 * @return bool|string
+	 */
+	public static function getNamespaceFromDirectory($directory)
+	{
+		$directories = explode('/', $directory);
+		$key = array_search('src', $directories);
+
+		$namespace = [];
+		for($i = $key + 1; $i < count($directories); $i++) {
+			$namespace[] = $directories[$i];
+		}
+
+		return $key ? implode('\\', $namespace) : false;
 	}
 
 	/**

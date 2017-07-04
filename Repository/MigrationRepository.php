@@ -3,6 +3,8 @@
 namespace Saelker\MigrationsBundle\Repository;
 
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Util\ImportFile;
+use Symfony\Component\Finder\Finder;
 
 /**
  * MigrationRepository
@@ -19,12 +21,52 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 	public function getLatestMigration($directory)
 	{
 		return $this
+			->getIdentifierQueryBuilder($directory)
+			->getQuery()
+			->getOneOrNullResult();
+	}
+
+	/**
+	 * @param $directory
+	 * @return integer
+	 */
+	public function getNextIdentifier($directory)
+	{
+		$todayIdentifier = (new \DateTime())->format('Ymd');
+
+		$sort = function (\SplFileInfo $a, \SplFileInfo $b)
+		{
+			return strcmp($b->getRealPath(), $a->getRealPath());
+		};
+
+		$finder = new Finder();
+		$finder
+			->files()
+			->in($directory)
+			->name('/V_\d*_.*/')
+			->sort($sort);
+
+		if ($finder->getIterator()->current()) {
+			$lastFile = new ImportFile($finder->getIterator()->current(), null);
+			$newNumber = substr($lastFile->getFileIdentifier(), 0, -3) == $todayIdentifier ? intval(substr($lastFile->getFileIdentifier(), -3)) + 1 : 1;
+		} else {
+			$newNumber = 1;
+		}
+
+		return $todayIdentifier . sprintf('%03d', $newNumber);
+	}
+
+	/**
+	 * @param $directory
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	private function getIdentifierQueryBuilder($directory)
+	{
+		return $this
 			->createQueryBuilder('m')
 			->andWhere('m.directory = :directory')
 			->setMaxResults(1)
 			->orderBy('m.identifier', 'DESC')
-			->setParameter('directory', $directory)
-			->getQuery()
-			->getOneOrNullResult();
+			->setParameter('directory', $directory);
 	}
 }
