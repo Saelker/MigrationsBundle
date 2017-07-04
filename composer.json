@@ -1,0 +1,33 @@
+{
+	"name": "saelker/migrations-bundle",
+	"type": "symfony-bundle",
+	"description": "Symfony Bundle to handle migrations between multiple bundles",
+	"keywords": ["migrations", "doctrine", "symfony", "symfony3", "bundle", "saelker"],
+	"homepage": "http://github.com/saelker/MigrationsBundle",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Sälker IT Solutions GmbH & Co. KG",
+			"email": "mf@saelker.com"
+		}
+	],
+	"require": {
+		"php":                      ">=5.5.3",
+		"symfony/framework-bundle": "~3.2",
+		"doctrine/dbal": 			"~2.5",
+		"symfony/console": 			"~2.3|~3.0"
+	},
+	"require-dev": {
+		"symfony/expression-language": "~3.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Saelker\\MigrationBundle\\": ""
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "1.0.x-dev"
+		}
+	}
+}
