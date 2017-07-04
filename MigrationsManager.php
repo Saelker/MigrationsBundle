@@ -75,7 +75,7 @@ class MigrationsManager
 				$finder = new Finder();
 				$finder->files()->in($directory);
 				$finder->filter(function (\SplFileInfo $file) use ($latestMigration) {
-					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) < $latestMigration->getIdentifier() || !$latestMigration)) {
+					if ($this->getFileIdentifier($file->getBasename()) && ($this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier() || !$latestMigration)) {
 						return true;
 					}
 
@@ -99,8 +99,6 @@ class MigrationsManager
 			foreach($files as $file) {
 				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
 				$io->progressAdvance(1);
-
-				$io->writeln($file->getFile()->getPath());
 
 				// Start migration
 				$file->migrate();

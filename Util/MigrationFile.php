@@ -2,6 +2,7 @@
 
 namespace Saelker\MigrationsBundle\Util;
 
+use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManager;
 
 abstract class MigrationFile
@@ -35,6 +36,21 @@ abstract class MigrationFile
 		$this->executeSql();
 
 		$this->postUp();
+
+		return $this;
+	}
+
+	/**
+	 * @param Schema $schema
+	 * @return $this
+	 */
+	public function addSchema(Schema $schema)
+	{
+		$platform = $this->em->getConnection()->getDatabasePlatform();
+
+		foreach($schema->toSql($platform) as $sql) {
+			$this->addSql($sql);
+		}
 
 		return $this;
 	}
