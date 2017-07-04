@@ -5,6 +5,7 @@ namespace Saelker\MigrationsBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsInfoCommand extends ContainerAwareCommand
 {
@@ -28,5 +29,10 @@ class MigrationsInfoCommand extends ContainerAwareCommand
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
+
+		$io = new SymfonyStyle($input, $output);
+
+		$io->title('Directories');
+		$io->listing($migrationsManager->getDirectories());
 	}
 }

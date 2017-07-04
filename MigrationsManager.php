@@ -70,7 +70,11 @@ class MigrationsManager
 				// Get Last Identifier
 				// Reject Migrations Files
 				// Execute Migrations Files & Write migration entries
-				$latestMigration = $repo->getLatestMigration($directory);
+				try {
+					$latestMigration = $repo->getLatestMigration($directory);
+				} catch (\Exception $e) {
+					$latestMigration = null;
+				}
 
 				$finder = new Finder();
 				$finder->files()->in($directory);
