@@ -1,6 +1,6 @@
 Saelker\MigrationsBundle\Entity\Migration:
     type: entity
-    table: null
+    table: migration
     repositoryClass: Saelker\MigrationsBundle\Repository\MigrationRepository
     indexes:
         directory_index:
