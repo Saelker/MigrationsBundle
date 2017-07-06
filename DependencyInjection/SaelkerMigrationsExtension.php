@@ -28,6 +28,11 @@ class SaelkerMigrationsExtension extends Extension
 		if (array_key_exists('directories', $config)) {
 			$this->addDirectories($config['directories'], $container);
 		}
+
+		if (array_key_exists('clean_depth', $config)) {
+			$directoryHelper = $container->getDefinition('saelker.directory_helper');
+			$directoryHelper->addArgument($config['clean_depth']);
+		}
 	}
 
 	/**

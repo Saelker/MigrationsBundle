@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 
 class MigrationsManager
@@ -21,12 +22,19 @@ class MigrationsManager
 	private $directories;
 
 	/**
+	 * @var ContainerInterface
+	 */
+	private $container;
+
+	/**
 	 * MigrationsManager constructor.
 	 * @param EntityManager $em
+	 * @param ContainerInterface $container
 	 */
-	public function __construct(EntityManager $em)
+	public function __construct(EntityManager $em, ContainerInterface $container)
 	{
 		$this->em = $em;
+		$this->container = $container;
 	}
 
 	/**
@@ -55,6 +63,7 @@ class MigrationsManager
 	public function migrate(SymfonyStyle $io)
 	{
 		$repo = $this->em->getRepository(Migration::class);
+		$directoryHelper = $this->container->get('saelker.directory_helper');
 
 		$io->title('Starting migration, directories:');
 		$io->listing($this->getDirectories());
@@ -71,7 +80,7 @@ class MigrationsManager
 				// Reject Migrations Files
 				// Execute Migrations Files & Write migration entries
 				try {
-					$latestMigration = $repo->getLatestMigration($directory);
+					$latestMigration = $repo->getLatestMigration($directoryHelper->getCleanedPath($directory));
 				} catch (\Exception $e) {
 					$latestMigration = null;
 				}
@@ -110,7 +119,7 @@ class MigrationsManager
 				// Generate DB Entry
 				$migration = new Migration();
 				$migration
-					->setDirectory($file->getFile()->getPath())
+					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
 					->setIdentifier($file->getFileIdentifier())
 					->setCreatedAt(new \DateTime());
 

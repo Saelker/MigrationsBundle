@@ -1,4 +1,7 @@
 services:
     saelker.migrations_manager:
         class: Saelker\MigrationsBundle\MigrationsManager
-        arguments: ["@doctrine.orm.default_entity_manager"]
+        arguments: ["@doctrine.orm.default_entity_manager", "@service_container"]
+
+    saelker.directory_helper:
+        class: Saelker\MigrationsBundle\Helper\DirectoryHelper

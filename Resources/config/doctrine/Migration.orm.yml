@@ -20,4 +20,5 @@ Saelker\MigrationsBundle\Entity\Migration:
             length: 255
         createdAt:
             type: datetime
+            column: createdAt
     lifecycleCallbacks: {  }
