@@ -52,3 +52,9 @@ bin/console saelker:migrations:migrate
 ```command
 bin/console saelker:migrations:generate
 ```
+### Step 6: Modify saved path depth
+```yaml
+# Saelker Migrations Directories
+saelker_migrations:
+    clean_depth: 3
+```
