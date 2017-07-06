@@ -31,13 +31,14 @@ class MigrationsGenerateCommand extends ContainerAwareCommand
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
+		$directoryHelper = $this->getContainer()->get('saelker.directory_helper');
 		$repo = $this->getContainer()->get('doctrine.orm.default_entity_manager')->getRepository(Migration::class);
 
 		$io = new SymfonyStyle($input, $output);
 
 		$io->title('Generate a new migrations file');
 
-		$directory = $io->choice('Select a Directory', $migrationsManager->getDirectories());
+		$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
 		$namespace = $io->ask('Namespace', GenerateMigration::getNamespaceFromDirectory($directory));
 		$description = $io->ask('Description');
 

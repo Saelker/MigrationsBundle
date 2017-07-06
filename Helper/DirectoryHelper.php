@@ -4,6 +4,9 @@ namespace Saelker\MigrationsBundle\Helper;
 
 class DirectoryHelper
 {
+	/**
+	 * @var
+	 */
 	private $cleanDepth;
 
 	/**
@@ -35,5 +38,22 @@ class DirectoryHelper
 		}
 
 		return implode('/', array_reverse($parts));
+	}
+
+	/**
+	 * @param array $directories
+	 * @return array
+	 */
+	public function getSourceDirectories(array $directories)
+	{
+		$srcDirectories = [];
+
+		foreach($directories as $directory) {
+			if (strpos($directory, 'src') !== false) {
+				$srcDirectories[] = $directory;
+			}
+		}
+
+		return $srcDirectories;
 	}
 }
