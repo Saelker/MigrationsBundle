@@ -4,6 +4,7 @@ namespace Saelker\MigrationsBundle\Util;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\SchemaTool;
 
 abstract class MigrationFile
 {
@@ -15,7 +16,17 @@ abstract class MigrationFile
 	/**
 	 * @var SqlStatement[]
 	 */
-	private $sql = [];
+	private $sqlStatements = [];
+
+	/**
+	 * @var string[]
+	 */
+	private $classes = [];
+
+	/**
+	 * @var Schema
+	 */
+	private $fromSchema;
 
 	/**
 	 * MigrationFile constructor.
@@ -46,9 +57,10 @@ abstract class MigrationFile
 	 */
 	public function addSchema(Schema $schema)
 	{
+		$fromSchema = $this->getFromSchema();
 		$platform = $this->em->getConnection()->getDatabasePlatform();
 
-		foreach($schema->toSql($platform) as $sql) {
+		foreach($fromSchema->getMigrateToSql($schema, $platform) as $sql) {
 			$this->addSql($sql);
 		}
 
@@ -62,9 +74,63 @@ abstract class MigrationFile
 	 */
 	public function addSql($sql, $params = null)
 	{
-		$this->sql[] = new SqlStatement($sql, $params);
+		$this->sqlStatements[] = new SqlStatement($sql, $params);
 
 		return $this;
+	}
+
+	/**
+	 * @param $class
+	 * @return $this
+	 */
+	public function addClass($class)
+	{
+		$this->classes[] = $class;
+
+		return $this;
+	}
+
+	/**
+	 * @return Schema
+	 */
+	public function getSchema()
+	{
+		return clone $this->getFromSchema();
+	}
+
+	/**
+	 * @return Schema
+	 */
+	public function getFromSchema()
+	{
+		if (!$this->fromSchema) {
+			$tool = new SchemaTool($this->em);
+			$this->fromSchema = $tool->getSchemaFromMetadata($this->getTableMetadata());
+		}
+
+		return $this->fromSchema;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTableMetadata()
+	{
+		$meta = [];
+
+		foreach($this->classes as $class) {
+			$meta[] = $this->em->getClassMetadata($class);
+		}
+
+		return $meta;
+	}
+
+	/**
+	 * @return SqlStatement[]
+	 */
+	public function getSqlStatements()
+	{
+		return $this->sqlStatements;
 	}
 
 	/**
@@ -72,11 +138,11 @@ abstract class MigrationFile
 	 */
 	private function executeSql()
 	{
-		foreach($this->sql as $key => $sql) {
+		foreach($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
 			$stmt->execute($sql->getParams());
 
-			unset($this->sql[$key]);
+			unset($this->sqlStatements[$key]);
 		}
 
 		return $this;
