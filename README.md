@@ -57,4 +57,5 @@ bin/console saelker:migrations:generate
 # Saelker Migrations Directories
 saelker_migrations:
     clean_depth: 3
+    directory_separator: '/'
 ```
