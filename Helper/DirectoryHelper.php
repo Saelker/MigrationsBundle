@@ -9,14 +9,18 @@ class DirectoryHelper
 	 */
 	private $cleanDepth;
 
-	/**
-	 * DirectoryHelper constructor.
-	 * @param $cleanDepth
-	 */
-	public function __construct($cleanDepth)
+    private $directorySeparator;
+
+    /**
+     * DirectoryHelper constructor.
+     * @param $cleanDepth
+     * @param $directorySeparator
+     */
+	public function __construct($cleanDepth, $directorySeparator)
 	{
 		$this->cleanDepth = $cleanDepth;
-	}
+        $this->directorySeparator = $directorySeparator ? $directorySeparator : '/';
+    }
 
 	/**
 	 * @param $directory
@@ -28,7 +32,7 @@ class DirectoryHelper
 			return $directory;
 		}
 
-		$directories = explode('/', $directory);
+		$directories = explode($this->directorySeparator, $directory);
 		$directoriesCount = count($directories);
 
 		$parts = [];

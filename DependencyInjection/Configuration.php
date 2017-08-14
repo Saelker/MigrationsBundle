@@ -26,6 +26,7 @@ class Configuration implements ConfigurationInterface
 					->prototype('scalar')->end()
 				->end()
 				->scalarNode('clean_depth')->defaultNull()->end()
+				->scalarNode('directory_separator')->defaultNull()->end()
 			->end();
 
 		return $treeBuilder;

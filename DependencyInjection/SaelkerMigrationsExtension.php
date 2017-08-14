@@ -33,6 +33,11 @@ class SaelkerMigrationsExtension extends Extension
 			$directoryHelper = $container->getDefinition('saelker.directory_helper');
 			$directoryHelper->addArgument($config['clean_depth']);
 		}
+
+		if (array_key_exists('directory_separator', $config)) {
+			$directoryHelper = $container->getDefinition('saelker.directory_helper');
+			$directoryHelper->addArgument($config['directory_separator']);
+		}
 	}
 
 	/**
