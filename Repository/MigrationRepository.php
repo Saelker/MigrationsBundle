@@ -26,6 +26,26 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 			->getOneOrNullResult();
 	}
 
+    /**
+     * @return mixed
+     */
+    public function getLatestSequence()
+    {
+        try {
+            $sequence = $this
+                ->createQueryBuilder('m')
+                ->select('MAX(m.sequence) as sequence')
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            $sequence = $sequence['sequence'];
+        } catch (\Exception $e) {
+            $sequence = 0;
+        }
+
+        return $sequence;
+    }
+
 	/**
 	 * @param $directory
 	 * @return integer

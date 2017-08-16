@@ -109,19 +109,8 @@ class MigrationsManager
 			$io->progressStart(count($files));
 
 			// Get new Sequence
-            try {
-                $sequence = $this
-                    ->em
-                    ->getRepository(Migration::class)
-                    ->createQueryBuilder('m')
-                    ->select('MAX(m.sequence)')
-                    ->getQuery()
-                    ->getOneOrNullResult();
-
-                $sequence++;
-            } catch (\Exception $e) {
-                $sequence = 0;
-            }
+            $sequence = $repo->getLatestSequence();
+            $sequence++;
 
 			/** @var ImportFile $file */
 			foreach($files as $file) {
@@ -154,6 +143,26 @@ class MigrationsManager
 
 		return $this;
 	}
+
+    /**
+     * @param SymfonyStyle $io
+     * @return $this
+     */
+    public function rollback(SymfonyStyle $io)
+    {
+        $repo = $this->em->getRepository(Migration::class);
+        $directoryHelper = $this->container->get('saelker.directory_helper');
+
+        $sequence = $repo->getLatestSequence();
+        $io->title('Rollback from sequence ' . $sequence. ' to ' . ($sequence -1));
+
+        /** @var ImportFile[] $files */
+        $files = [];
+
+        //TODO Rolback
+
+        return $this;
+    }
 
 	/**
 	 * @param $basename
