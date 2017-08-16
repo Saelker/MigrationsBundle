@@ -26,16 +26,23 @@ class MigrationsManager
 	 */
 	private $container;
 
-	/**
-	 * MigrationsManager constructor.
-	 * @param EntityManager $em
-	 * @param ContainerInterface $container
-	 */
-	public function __construct(EntityManager $em, ContainerInterface $container)
+    /**
+     * @var bool
+     */
+    private $ignoreErrors;
+
+    /**
+     * MigrationsManager constructor.
+     * @param EntityManager $em
+     * @param ContainerInterface $container
+     * @param bool $ignoreErrors
+     */
+	public function __construct(EntityManager $em, ContainerInterface $container, $ignoreErrors)
 	{
 		$this->em = $em;
 		$this->container = $container;
-	}
+        $this->ignoreErrors = $ignoreErrors;
+    }
 
 	/**
 	 * @param \string $directory
@@ -56,10 +63,11 @@ class MigrationsManager
 		return $this->directories;
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 * @return $this
-	 */
+    /**
+     * @param SymfonyStyle $io
+     * @return $this
+     * @throws \Exception
+     */
 	public function migrate(SymfonyStyle $io)
 	{
 		$repo = $this->em->getRepository(Migration::class);
@@ -104,6 +112,8 @@ class MigrationsManager
 			}
 		}
 
+		$files = array_unique($files);
+
 		if ($files) {
 			// Execute migrations Files
 			$io->progressStart(count($files));
@@ -117,19 +127,26 @@ class MigrationsManager
 				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
 				$io->progressAdvance(1);
 
-				// Start migration
-				$file->migrate();
+				try {
+                    // Start migration
+                    $file->migrate();
+                } catch (\Exception $e) {
+                    if (!$this->ignoreErrors) {
+                        throw new \Exception('Error ' . $e);
+                    }
+                }
 
-				// Generate DB Entry
-				$migration = new Migration();
-				$migration
-					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
-					->setIdentifier($file->getFileIdentifier())
-					->setCreatedAt(new \DateTime())
+                // Generate DB Entry
+                $migration = new Migration();
+                $migration
+                    ->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
+                    ->setIdentifier($file->getFileIdentifier())
+                    ->setCreatedAt(new \DateTime())
                     ->setSequence($sequence);
 
-				$this->em->persist($migration);
-				$this->em->flush();
+                $this->em->persist($migration);
+                $this->em->flush();
+
 			}
 
 			$io->progressFinish();

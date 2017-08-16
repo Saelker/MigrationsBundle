@@ -29,16 +29,15 @@ class SaelkerMigrationsExtension extends Extension
             $this->addDirectories($config['directories'], $container);
         }
 
+        // Add configs to directory helper
         $directoryHelper = $container->getDefinition('saelker.directory_helper');
-        if (array_key_exists('clean_depth', $config)) {
-			$directoryHelper->addArgument($config['clean_depth']);
-		}
-
-		if (array_key_exists('directory_separator', $config)) {
-			$directoryHelper->addArgument($config['directory_separator']);
-        }
-
+        $directoryHelper->addArgument($config['clean_depth']);
+        $directoryHelper->addArgument($config['directory_separator']);
         $directoryHelper->addArgument($config['use_camel_case']);
+
+        // Add ignore errors to migrations manager
+        $migrationsManager = $container->getDefinition('saelker.migrations_manager');
+        $migrationsManager->addArgument($config['ignore_errors']);
 	}
 
 	/**

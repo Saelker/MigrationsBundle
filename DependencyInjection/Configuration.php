@@ -28,6 +28,7 @@ class Configuration implements ConfigurationInterface
 				->scalarNode('clean_depth')->defaultNull()->end()
 				->scalarNode('directory_separator')->defaultValue('/')->end()
                 ->booleanNode('use_camel_case')->defaultFalse()->end()
+                ->booleanNode('ignore_errors')->defaultFalse()->end()
 			->end();
 
 		return $treeBuilder;

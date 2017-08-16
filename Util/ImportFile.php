@@ -98,4 +98,9 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : false;
 	}
 
+	public function __toString()
+    {
+        return $this->getFile()->getBasename();
+    }
+
 }

@@ -19,7 +19,7 @@ abstract class MigrationFile
 	private $sqlStatements = [];
 
 	/**
-	 * @var string[]
+	 * @var string[][]
 	 */
 	private $classes = [];
 
@@ -119,8 +119,17 @@ abstract class MigrationFile
 		$meta = [];
 
 		foreach($this->classes as $class) {
-			$meta[] = $this->em->getClassMetadata($class);
+			$metaData = $this->em->getClassMetadata($class['class']);
+
+			foreach ($class['ignoreColumns'] as $ignoreColumn) {
+			    if (array_key_exists($ignoreColumn, $metaData->fieldMappings)) {
+			        unset($metaData->fieldMappings[$ignoreColumn]);
+                }
+            }
+
+            $meta[] = $metaData;
 		}
+
 
 		return $meta;
 	}
