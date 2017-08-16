@@ -63,5 +63,6 @@ bin/console saelker:migrations:generate
 saelker_migrations:
     clean_depth: 3
     directory_separator: '/'
-    use_camel_case: true
+    use_camel_case: false
+    ignore_errors: false
 ```
