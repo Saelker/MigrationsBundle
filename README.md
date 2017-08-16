@@ -1,7 +1,9 @@
 Saelker Migrations Bundle
 ---
 
-### Update from 1.x => 2.x
+### Update from 1.1.x => 1.2.x
+Before updating to 1.2.x add to migration table the `sequence` column with type `interger`
+
 
 
 ### Step 1: Install via Composer
