@@ -25,19 +25,20 @@ class SaelkerMigrationsExtension extends Extension
 		$loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 		$loader->load('services.yml');
 
-		if (array_key_exists('directories', $config)) {
-			$this->addDirectories($config['directories'], $container);
-		}
+        if (array_key_exists('directories', $config)) {
+            $this->addDirectories($config['directories'], $container);
+        }
 
-		if (array_key_exists('clean_depth', $config)) {
-			$directoryHelper = $container->getDefinition('saelker.directory_helper');
+        $directoryHelper = $container->getDefinition('saelker.directory_helper');
+        if (array_key_exists('clean_depth', $config)) {
 			$directoryHelper->addArgument($config['clean_depth']);
 		}
 
 		if (array_key_exists('directory_separator', $config)) {
-			$directoryHelper = $container->getDefinition('saelker.directory_helper');
 			$directoryHelper->addArgument($config['directory_separator']);
-		}
+        }
+
+        $directoryHelper->addArgument($config['use_camel_case']);
 	}
 
 	/**
