@@ -108,6 +108,21 @@ class MigrationsManager
 			// Execute migrations Files
 			$io->progressStart(count($files));
 
+			// Get new Sequence
+            try {
+                $sequence = $this
+                    ->em
+                    ->getRepository(Migration::class)
+                    ->createQueryBuilder('m')
+                    ->select('MAX(m.sequence)')
+                    ->getQuery()
+                    ->getOneOrNullResult();
+
+                $sequence++;
+            } catch (\Exception $e) {
+                $sequence = 0;
+            }
+
 			/** @var ImportFile $file */
 			foreach($files as $file) {
 				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
@@ -121,7 +136,8 @@ class MigrationsManager
 				$migration
 					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
 					->setIdentifier($file->getFileIdentifier())
-					->setCreatedAt(new \DateTime());
+					->setCreatedAt(new \DateTime())
+                    ->setSequence($sequence);
 
 				$this->em->persist($migration);
 				$this->em->flush();

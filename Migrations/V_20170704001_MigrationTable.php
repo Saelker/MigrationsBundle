@@ -17,6 +17,7 @@ class V_20170704001_MigrationTable extends MigrationFile
 		$table->addColumn('identifier', 'string');
 		$table->addColumn('directory', 'string');
 		$table->addColumn('createdAt', 'datetime');
+		$table->addColumn('sequence', 'integer');
 
 		$table->setPrimaryKey(['id']);
 		$table->addIndex(['directory'], 'directory_index');
