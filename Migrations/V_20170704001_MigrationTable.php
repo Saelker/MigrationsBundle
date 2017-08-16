@@ -24,4 +24,3 @@ class V_20170704001_MigrationTable extends MigrationFile
 		$this->addSchema($schema);
 	}
 }
-		

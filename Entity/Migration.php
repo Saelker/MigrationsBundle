@@ -27,6 +27,11 @@ class Migration
 	 */
 	private $createdAt;
 
+    /**
+     * @var int
+     */
+	private $sequence;
+
 
 	/**
 	 * Get id
@@ -94,5 +99,20 @@ class Migration
 
 		return $this;
 	}
-}
 
+    /**
+     * @return int
+     */
+    public function getSequence()
+    {
+        return $this->sequence;
+    }
+
+    /**
+     * @param int $sequence
+     */
+    public function setSequence($sequence)
+    {
+        $this->sequence = $sequence;
+    }
+}

@@ -21,4 +21,7 @@ Saelker\MigrationsBundle\Entity\Migration:
         createdAt:
             type: datetime
             column: createdAt
+        sequence:
+            type: integer
+            column: sequence
     lifecycleCallbacks: {  }
