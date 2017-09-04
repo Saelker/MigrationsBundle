@@ -4,6 +4,7 @@ namespace Saelker\MigrationsBundle\Util;
 
 
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ImportFile
@@ -17,20 +18,28 @@ class ImportFile
 	 * @var MigrationFile
 	 */
 	private $instance;
+
 	/**
 	 * @var EntityManager
 	 */
 	private $em;
 
 	/**
+	 * @var ContainerInterface
+	 */
+	private $container;
+
+	/**
 	 * ImportFile constructor.
 	 * @param SplFileInfo $file
 	 * @param EntityManager $entityManager
+	 * @param ContainerInterface $container
 	 */
-	public function __construct(SplFileInfo $file, $entityManager)
+	public function __construct(SplFileInfo $file, $entityManager, ContainerInterface $container)
 	{
 		$this->file = $file;
 		$this->em = $entityManager;
+		$this->container = $container;
 	}
 
 	/**
@@ -60,7 +69,7 @@ class ImportFile
 		if (!$this->instance) {
 			$class = $this->getNamespace() . "\\" . $this->getClassName();
 
-			$this->instance = new $class($this->em);
+			$this->instance = new $class($this->em, $this->container);
 		}
 
 		return $this->instance;

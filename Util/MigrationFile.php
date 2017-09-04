@@ -5,6 +5,7 @@ namespace Saelker\MigrationsBundle\Util;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class MigrationFile
 {
@@ -29,12 +30,19 @@ abstract class MigrationFile
 	private $fromSchema;
 
 	/**
+	 * @var ContainerInterface
+	 */
+	protected $container;
+
+	/**
 	 * MigrationFile constructor.
 	 * @param EntityManager $em
+	 * @param ContainerInterface $container
 	 */
-	public function __construct(EntityManager $em)
+	public function __construct(EntityManager $em, ContainerInterface $container)
 	{
 		$this->em = $em;
+		$this->container = $container;
 	}
 
 	/**
