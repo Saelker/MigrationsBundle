@@ -35,7 +35,7 @@ class ImportFile
 	 * @param EntityManager $entityManager
 	 * @param ContainerInterface $container
 	 */
-	public function __construct(SplFileInfo $file, $entityManager, ContainerInterface $container)
+	public function __construct(SplFileInfo $file, ?EntityManager $entityManager, ?ContainerInterface $container)
 	{
 		$this->file = $file;
 		$this->em = $entityManager;

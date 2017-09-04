@@ -13,7 +13,6 @@ class GenerateMigration
 
 namespace <namespace>;
 
-use Doctrine\DBAL\Schema\Schema;
 use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_<identifier>_<description> extends MigrationFile
@@ -22,8 +21,7 @@ class V_<identifier>_<description> extends MigrationFile
 	{
 		// this is auto-generated
 	}
-}
-		';
+}';
 
 	/**
 	 * @param string $namespace
