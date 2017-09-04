@@ -104,7 +104,7 @@ class MigrationsManager
 				});
 
 				foreach($finder as $file) {
-					$files[] = new ImportFile($file, $this->em);
+					$files[] = new ImportFile($file, $this->em, $this->container);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
