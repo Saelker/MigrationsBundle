@@ -55,7 +55,7 @@ class DirectoryHelper
             }
         }
 
-		return implode($this->directorySeparator, array_reverse($parts));
+		return implode('/', array_reverse($parts));
 	}
 
 	/**
