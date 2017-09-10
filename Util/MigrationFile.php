@@ -133,6 +133,10 @@ abstract class MigrationFile
 			    if (array_key_exists($ignoreColumn, $metaData->fieldMappings)) {
 			        unset($metaData->fieldMappings[$ignoreColumn]);
                 }
+				
+			if (array_key_exists($ignoreColumn, $metaData->associationMappings)) {
+			        unset($metaData->associationMappings[$ignoreColumn]);
+                }
             }
 
             $meta[] = $metaData;
