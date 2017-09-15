@@ -48,11 +48,16 @@ abstract class MigrationFile
 	/**
 	 * @return MigrationFile
 	 */
-	public function executeUp() {
+	public function executeUp()
+	{
 		$this->preUp();
 
 		$this->up();
-		$this->executeSql();
+
+		// Execute alle sqls in transaction
+		$this->em->getConnection()->transactional(function () {
+			$this->executeSql();
+		});
 
 		$this->postUp();
 
@@ -68,7 +73,7 @@ abstract class MigrationFile
 		$fromSchema = $this->getFromSchema();
 		$platform = $this->em->getConnection()->getDatabasePlatform();
 
-		foreach($fromSchema->getMigrateToSql($schema, $platform) as $sql) {
+		foreach ($fromSchema->getMigrateToSql($schema, $platform) as $sql) {
 			$this->addSql($sql);
 		}
 
@@ -126,20 +131,20 @@ abstract class MigrationFile
 	{
 		$meta = [];
 
-		foreach($this->classes as $class) {
+		foreach ($this->classes as $class) {
 			$metaData = $this->em->getClassMetadata($class['class']);
 
 			foreach ($class['ignoreColumns'] as $ignoreColumn) {
-			    if (array_key_exists($ignoreColumn, $metaData->fieldMappings)) {
-			        unset($metaData->fieldMappings[$ignoreColumn]);
-                }
-				
-			if (array_key_exists($ignoreColumn, $metaData->associationMappings)) {
-			        unset($metaData->associationMappings[$ignoreColumn]);
-                }
-            }
+				if (array_key_exists($ignoreColumn, $metaData->fieldMappings)) {
+					unset($metaData->fieldMappings[$ignoreColumn]);
+				}
 
-            $meta[] = $metaData;
+				if (array_key_exists($ignoreColumn, $metaData->associationMappings)) {
+					unset($metaData->associationMappings[$ignoreColumn]);
+				}
+			}
+
+			$meta[] = $metaData;
 		}
 
 
@@ -159,7 +164,7 @@ abstract class MigrationFile
 	 */
 	private function executeSql()
 	{
-		foreach($this->getSqlStatements() as $key => $sql) {
+		foreach ($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
 			$stmt->execute($sql->getParams());
 
@@ -177,10 +182,14 @@ abstract class MigrationFile
 	/**
 	 *
 	 */
-	public function preUp() {}
+	public function preUp()
+	{
+	}
 
 	/**
 	 *
 	 */
-	public function postUp() {}
+	public function postUp()
+	{
+	}
 }
