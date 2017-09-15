@@ -26,23 +26,23 @@ class MigrationsManager
 	 */
 	private $container;
 
-    /**
-     * @var bool
-     */
-    private $ignoreErrors;
+	/**
+	 * @var bool
+	 */
+	private $ignoreErrors;
 
-    /**
-     * MigrationsManager constructor.
-     * @param EntityManager $em
-     * @param ContainerInterface $container
-     * @param bool $ignoreErrors
-     */
+	/**
+	 * MigrationsManager constructor.
+	 * @param EntityManager $em
+	 * @param ContainerInterface $container
+	 * @param bool $ignoreErrors
+	 */
 	public function __construct(EntityManager $em, ContainerInterface $container, $ignoreErrors)
 	{
 		$this->em = $em;
 		$this->container = $container;
-        $this->ignoreErrors = $ignoreErrors;
-    }
+		$this->ignoreErrors = $ignoreErrors;
+	}
 
 	/**
 	 * @param \string $directory
@@ -63,11 +63,11 @@ class MigrationsManager
 		return $this->directories;
 	}
 
-    /**
-     * @param SymfonyStyle $io
-     * @return $this
-     * @throws \Exception
-     */
+	/**
+	 * @param SymfonyStyle $io
+	 * @return $this
+	 * @throws \Exception
+	 */
 	public function migrate(SymfonyStyle $io)
 	{
 		$repo = $this->em->getRepository(Migration::class);
@@ -103,7 +103,7 @@ class MigrationsManager
 					return false;
 				});
 
-				foreach($finder as $file) {
+				foreach ($finder as $file) {
 					$files[] = new ImportFile($file, $this->em, $this->container);
 				}
 			} else {
@@ -114,38 +114,42 @@ class MigrationsManager
 
 		$files = array_unique($files);
 
+		usort($files, function (ImportFile $x, ImportFile $y) {
+			return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
+		});
+
 		if ($files) {
 			// Execute migrations Files
 			$io->progressStart(count($files));
 
 			// Get new Sequence
-            $sequence = $repo->getLatestSequence();
-            $sequence++;
+			$sequence = $repo->getLatestSequence();
+			$sequence++;
 
 			/** @var ImportFile $file */
-			foreach($files as $file) {
-				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename()."</info>");
+			foreach ($files as $file) {
+				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename() . "</info>");
 				$io->progressAdvance(1);
 
 				try {
-                    // Start migration
-                    $file->migrate();
-                } catch (\Exception $e) {
-                    if (!$this->ignoreErrors) {
-                        throw new \Exception('Error ' . $e);
-                    }
-                }
+					// Start migration
+					$file->migrate();
+				} catch (\Exception $e) {
+					if (!$this->ignoreErrors) {
+						throw new \Exception('Error ' . $e);
+					}
+				}
 
-                // Generate DB Entry
-                $migration = new Migration();
-                $migration
-                    ->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
-                    ->setIdentifier($file->getFileIdentifier())
-                    ->setCreatedAt(new \DateTime())
-                    ->setSequence($sequence);
+				// Generate DB Entry
+				$migration = new Migration();
+				$migration
+					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
+					->setIdentifier($file->getFileIdentifier())
+					->setCreatedAt(new \DateTime())
+					->setSequence($sequence);
 
-                $this->em->persist($migration);
-                $this->em->flush();
+				$this->em->persist($migration);
+				$this->em->flush();
 
 			}
 
@@ -161,25 +165,25 @@ class MigrationsManager
 		return $this;
 	}
 
-    /**
-     * @param SymfonyStyle $io
-     * @return $this
-     */
-    public function rollback(SymfonyStyle $io)
-    {
-        $repo = $this->em->getRepository(Migration::class);
-        $directoryHelper = $this->container->get('saelker.directory_helper');
+	/**
+	 * @param SymfonyStyle $io
+	 * @return $this
+	 */
+	public function rollback(SymfonyStyle $io)
+	{
+		$repo = $this->em->getRepository(Migration::class);
+		$directoryHelper = $this->container->get('saelker.directory_helper');
 
-        $sequence = $repo->getLatestSequence();
-        $io->title('Rollback from sequence ' . $sequence. ' to ' . ($sequence -1));
+		$sequence = $repo->getLatestSequence();
+		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
 
-        /** @var ImportFile[] $files */
-        $files = [];
+		/** @var ImportFile[] $files */
+		$files = [];
 
-        //TODO Rolback
+		//TODO Rolback
 
-        return $this;
-    }
+		return $this;
+	}
 
 	/**
 	 * @param $basename
