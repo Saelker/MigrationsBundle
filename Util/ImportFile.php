@@ -108,8 +108,8 @@ class ImportFile
 	}
 
 	public function __toString()
-    {
-        return $this->getFile()->getBasename();
-    }
+	{
+		return $this->getFile()->getBasename();
+	}
 
 }

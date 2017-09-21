@@ -9,28 +9,28 @@ class DirectoryHelper
 	 */
 	private $cleanDepth;
 
-    /**
-     * @var
-     */
-    private $directorySeparator;
+	/**
+	 * @var
+	 */
+	private $directorySeparator;
 
-    /**
-     * @var
-     */
-    private $useCamelCase;
+	/**
+	 * @var
+	 */
+	private $useCamelCase;
 
-    /**
-     * DirectoryHelper constructor.
-     * @param $cleanDepth
-     * @param $directorySeparator
-     * @param $useCamelCase
-     */
+	/**
+	 * DirectoryHelper constructor.
+	 * @param $cleanDepth
+	 * @param $directorySeparator
+	 * @param $useCamelCase
+	 */
 	public function __construct($cleanDepth, $directorySeparator, $useCamelCase)
 	{
 		$this->cleanDepth = $cleanDepth;
-        $this->directorySeparator = $directorySeparator;
-        $this->useCamelCase = $useCamelCase;
-    }
+		$this->directorySeparator = $directorySeparator;
+		$this->useCamelCase = $useCamelCase;
+	}
 
 	/**
 	 * @param $directory
@@ -47,13 +47,13 @@ class DirectoryHelper
 
 		$parts = [];
 
-		for($i = $directoriesCount; $i > $directoriesCount - $this->cleanDepth; $i--) {
-		    if ($this->useCamelCase) {
-                $parts[] = ucwords(str_replace('-', ' ', $directories[$i - 1]), '');
-            } else {
-                $parts[] = $directories[$i - 1];
-            }
-        }
+		for ($i = $directoriesCount; $i > $directoriesCount - $this->cleanDepth; $i--) {
+			if ($this->useCamelCase) {
+				$parts[] = ucwords(str_replace('-', ' ', $directories[$i - 1]), '');
+			} else {
+				$parts[] = $directories[$i - 1];
+			}
+		}
 
 		return implode('/', array_reverse($parts));
 	}
@@ -66,7 +66,7 @@ class DirectoryHelper
 	{
 		$srcDirectories = [];
 
-		foreach($directories as $directory) {
+		foreach ($directories as $directory) {
 			if (strpos($directory, 'src') !== false) {
 				$srcDirectories[] = $directory;
 			}

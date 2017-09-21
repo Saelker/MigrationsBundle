@@ -45,6 +45,6 @@ class MigrationsGenerateCommand extends ContainerAwareCommand
 		// Generate file
 		$file = GenerateMigration::generate($namespace, $repo->getNextIdentifier($directory), $description, $directory);
 
-		$io->success('Migration file was generated: '. $file);
+		$io->success('Migration file was generated: ' . $file);
 	}
 }

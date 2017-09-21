@@ -28,8 +28,8 @@ class MigrationsRollbackCommand extends ContainerAwareCommand
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-        $migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
-        $io = new SymfonyStyle($input, $output);
-        $migrationsManager->rollback($io);
+		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
+		$io = new SymfonyStyle($input, $output);
+		$migrationsManager->rollback($io);
 	}
 }

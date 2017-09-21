@@ -66,7 +66,7 @@ class V_<identifier>_<description> extends MigrationFile
 		$key = array_search('src', $directories);
 
 		$namespace = [];
-		for($i = $key + 1; $i < count($directories); $i++) {
+		for ($i = $key + 1; $i < count($directories); $i++) {
 			$namespace[] = $directories[$i];
 		}
 

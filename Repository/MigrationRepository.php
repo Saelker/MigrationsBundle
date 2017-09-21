@@ -26,25 +26,25 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 			->getOneOrNullResult();
 	}
 
-    /**
-     * @return mixed
-     */
-    public function getLatestSequence()
-    {
-        try {
-            $sequence = $this
-                ->createQueryBuilder('m')
-                ->select('MAX(m.sequence) as sequence')
-                ->getQuery()
-                ->getOneOrNullResult();
+	/**
+	 * @return mixed
+	 */
+	public function getLatestSequence()
+	{
+		try {
+			$sequence = $this
+				->createQueryBuilder('m')
+				->select('MAX(m.sequence) as sequence')
+				->getQuery()
+				->getOneOrNullResult();
 
-            $sequence = $sequence['sequence'];
-        } catch (\Exception $e) {
-            $sequence = 0;
-        }
+			$sequence = $sequence['sequence'];
+		} catch (\Exception $e) {
+			$sequence = 0;
+		}
 
-        return $sequence;
-    }
+		return $sequence;
+	}
 
 	/**
 	 * @param $directory
@@ -54,8 +54,7 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 	{
 		$todayIdentifier = (new \DateTime())->format('Ymd');
 
-		$sort = function (\SplFileInfo $a, \SplFileInfo $b)
-		{
+		$sort = function (\SplFileInfo $a, \SplFileInfo $b) {
 			return strcmp($b->getRealPath(), $a->getRealPath());
 		};
 

@@ -17,7 +17,7 @@ class SqlStatement
 	/**
 	 * SqlStatement constructor.
 	 * @param string $sql
-	 * @param array  $params
+	 * @param array $params
 	 */
 	public function __construct($sql, $params)
 	{

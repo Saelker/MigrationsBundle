@@ -22,13 +22,13 @@ class Configuration implements ConfigurationInterface
 
 		$rootNode
 			->children()
-				->arrayNode('directories')
-					->prototype('scalar')->end()
-				->end()
-				->scalarNode('clean_depth')->defaultNull()->end()
-				->scalarNode('directory_separator')->defaultValue('/')->end()
-                ->booleanNode('use_camel_case')->defaultFalse()->end()
-                ->booleanNode('ignore_errors')->defaultFalse()->end()
+			->arrayNode('directories')
+			->prototype('scalar')->end()
+			->end()
+			->scalarNode('clean_depth')->defaultNull()->end()
+			->scalarNode('directory_separator')->defaultValue('/')->end()
+			->booleanNode('use_camel_case')->defaultFalse()->end()
+			->booleanNode('ignore_errors')->defaultFalse()->end()
 			->end();
 
 		return $treeBuilder;
