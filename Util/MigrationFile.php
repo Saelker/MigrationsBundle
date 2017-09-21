@@ -50,16 +50,17 @@ abstract class MigrationFile
 	 */
 	public function executeUp()
 	{
-		$this->preUp();
-
-		$this->up();
-
-		// Execute alle sqls in transaction
+		// Execute all statements in transaction
 		$this->em->getConnection()->transactional(function () {
-			$this->executeSql();
-		});
+			$this->resetEntityManager();
 
-		$this->postUp();
+			$this->preUp();
+
+			$this->up();
+
+			$this->executeSql();
+			$this->postUp();
+		});
 
 		return $this;
 	}
@@ -132,7 +133,7 @@ abstract class MigrationFile
 		$meta = [];
 
 		foreach ($this->classes as $class) {
-			$metaData = $this->em->getClassMetadata($class['class']);
+			$metaData = clone $this->em->getClassMetadata($class['class']);
 
 			foreach ($class['ignoreColumns'] as $ignoreColumn) {
 				if (array_key_exists($ignoreColumn, $metaData->fieldMappings)) {
@@ -172,6 +173,19 @@ abstract class MigrationFile
 		}
 
 		return $this;
+	}
+
+	/**
+	 *
+	 */
+	private function resetEntityManager()
+	{
+		$this->em = $this->em->create(
+			$this->em->getConnection(),
+			$this->em->getConfiguration()
+		);
+
+		$this->em->clear();
 	}
 
 	/**
