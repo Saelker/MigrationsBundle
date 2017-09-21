@@ -76,12 +76,14 @@ class MigrationsManager
 		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
 		$io->title('Starting migration, directories:');
-		$io->listing($this->getDirectories());
 
 		/** @var ImportFile[] $files */
 		$files = [];
 
-		foreach ($this->getDirectories() as $directory) {
+		$directories = $directory ? [$directory] : $this->getDirectories();
+		$io->listing($directories);
+
+		foreach ($directories as $directory) {
 			// Check if directory exists
 			if (is_dir($directory)) {
 
