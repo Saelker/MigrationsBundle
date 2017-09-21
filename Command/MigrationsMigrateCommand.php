@@ -2,8 +2,11 @@
 
 namespace Saelker\MigrationsBundle\Command;
 
+use Saelker\MigrationsBundle\Helper\DirectoryHelper;
+use Saelker\MigrationsBundle\MigrationsManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -18,6 +21,12 @@ class MigrationsMigrateCommand extends ContainerAwareCommand
 
 		$this
 			->setName('saelker:migrations:migrate')
+			->addOption(
+				'select-directory',
+				null,
+				InputOption::VALUE_OPTIONAL,
+				'If false or null all directories are used',
+				false)
 			->setDescription('Starts migrations');
 	}
 
@@ -28,8 +37,16 @@ class MigrationsMigrateCommand extends ContainerAwareCommand
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
+		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
+		$directoryHelper = $this->getContainer()->get(DirectoryHelper::class);
+
 		$io = new SymfonyStyle($input, $output);
-		$migrationsManager->migrate($io);
+
+		$directory = false;
+		if ($input->getOption('select-directory')) {
+			$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
+		}
+
+		$migrationsManager->migrate($io, $directory);
 	}
 }

@@ -3,6 +3,8 @@
 namespace Saelker\MigrationsBundle\Command;
 
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Helper\DirectoryHelper;
+use Saelker\MigrationsBundle\MigrationsManager;
 use Saelker\MigrationsBundle\Util\GenerateMigration;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,8 +32,8 @@ class MigrationsGenerateCommand extends ContainerAwareCommand
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
-		$directoryHelper = $this->getContainer()->get('saelker.directory_helper');
+		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
+		$directoryHelper = $this->getContainer()->get(DirectoryHelper::class);
 		$repo = $this->getContainer()->get('doctrine.orm.default_entity_manager')->getRepository(Migration::class);
 
 		$io = new SymfonyStyle($input, $output);

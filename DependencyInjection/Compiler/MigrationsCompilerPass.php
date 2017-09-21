@@ -2,6 +2,7 @@
 
 namespace Saelker\MigrationsBundle\DependencyInjection\Compiler;
 
+use Saelker\MigrationsBundle\MigrationsManager;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -23,6 +24,6 @@ class MigrationsCompilerPass implements CompilerPassInterface
 
 	public function process(ContainerBuilder $container)
 	{
-		$container->getDefinition('saelker.migrations_manager')->addMethodCall('addDirectory', [$this->directory]);
+		$container->getDefinition(MigrationsManager::class)->addMethodCall('addDirectory', [$this->directory]);
 	}
 }

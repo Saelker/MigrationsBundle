@@ -4,6 +4,7 @@ namespace Saelker\MigrationsBundle;
 
 use Doctrine\ORM\EntityManager;
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -65,13 +66,14 @@ class MigrationsManager
 
 	/**
 	 * @param SymfonyStyle $io
+	 * @param string $directory
 	 * @return $this
 	 * @throws \Exception
 	 */
-	public function migrate(SymfonyStyle $io)
+	public function migrate(SymfonyStyle $io, $directory = null)
 	{
 		$repo = $this->em->getRepository(Migration::class);
-		$directoryHelper = $this->container->get('saelker.directory_helper');
+		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
 		$io->title('Starting migration, directories:');
 		$io->listing($this->getDirectories());
@@ -172,7 +174,7 @@ class MigrationsManager
 	public function rollback(SymfonyStyle $io)
 	{
 		$repo = $this->em->getRepository(Migration::class);
-		$directoryHelper = $this->container->get('saelker.directory_helper');
+		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
 		$sequence = $repo->getLatestSequence();
 		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));

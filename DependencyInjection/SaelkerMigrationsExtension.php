@@ -2,6 +2,8 @@
 
 namespace Saelker\MigrationsBundle\DependencyInjection;
 
+use Saelker\MigrationsBundle\Helper\DirectoryHelper;
+use Saelker\MigrationsBundle\MigrationsManager;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -30,13 +32,13 @@ class SaelkerMigrationsExtension extends Extension
 		}
 
 		// Add configs to directory helper
-		$directoryHelper = $container->getDefinition('saelker.directory_helper');
+		$directoryHelper = $container->getDefinition(DirectoryHelper::class);
 		$directoryHelper->addArgument($config['clean_depth']);
 		$directoryHelper->addArgument($config['directory_separator']);
 		$directoryHelper->addArgument($config['use_camel_case']);
 
 		// Add ignore errors to migrations manager
-		$migrationsManager = $container->getDefinition('saelker.migrations_manager');
+		$migrationsManager = $container->getDefinition(MigrationsManager::class);
 		$migrationsManager->addArgument($config['ignore_errors']);
 	}
 
@@ -46,7 +48,7 @@ class SaelkerMigrationsExtension extends Extension
 	 */
 	private function addDirectories($directories, ContainerBuilder $container)
 	{
-		$manager = $container->getDefinition('saelker.migrations_manager');
+		$manager = $container->getDefinition(MigrationsManager::class);
 
 		foreach ($directories as $directory) {
 			$manager->addMethodCall('addDirectory', [$directory]);

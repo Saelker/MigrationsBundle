@@ -2,6 +2,7 @@
 
 namespace Saelker\MigrationsBundle\Command;
 
+use Saelker\MigrationsBundle\MigrationsManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,7 +29,7 @@ class MigrationsInfoCommand extends ContainerAwareCommand
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$migrationsManager = $this->getContainer()->get('saelker.migrations_manager');
+		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
 
 		$io = new SymfonyStyle($input, $output);
 
