@@ -7,21 +7,26 @@ use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_20170704001_MigrationTable extends MigrationFile
 {
+	private $table = 'migration';
+
 	public function up()
 	{
-		$schema = new Schema();
+		if (!$this->connectionHelper->tablesExists($this->table)) {
 
-		$table = $schema->createTable('migration');
+			$schema = new Schema();
 
-		$table->addColumn('id', 'integer', ['autoincrement' => true]);
-		$table->addColumn('identifier', 'string');
-		$table->addColumn('directory', 'string');
-		$table->addColumn('createdAt', 'datetime');
-		$table->addColumn('sequence', 'integer');
+			$table = $schema->createTable($this->table);
 
-		$table->setPrimaryKey(['id']);
-		$table->addIndex(['directory'], 'directory_index');
+			$table->addColumn('id', 'integer', ['autoincrement' => true]);
+			$table->addColumn('identifier', 'string');
+			$table->addColumn('directory', 'string');
+			$table->addColumn('createdAt', 'datetime');
+			$table->addColumn('sequence', 'integer');
 
-		$this->addSchema($schema);
+			$table->setPrimaryKey(['id']);
+			$table->addIndex(['directory'], 'directory_index');
+
+			$this->addSchema($schema);
+		}
 	}
 }

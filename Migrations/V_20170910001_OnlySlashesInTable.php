@@ -13,7 +13,7 @@ class V_20170910001_OnlySlashesInTable extends MigrationFile
 
 		/** @var Migration $migration */
 		foreach ($migrations as $migration) {
-			// Search for baskslashes and replace them with a normal slash
+			// Search for backslashes and replace them with a normal slash
 			$migration->setDirectory(str_replace('\\', '/', $migration->getDirectory()));
 		}
 

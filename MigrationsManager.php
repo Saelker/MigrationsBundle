@@ -114,7 +114,10 @@ class MigrationsManager
 				$finder = new Finder();
 				$finder->files()->in($directory);
 				$finder->filter(function (\SplFileInfo $file) use ($latestMigration) {
-					if ($this->getFileIdentifier($file->getBasename()) && (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())) {
+					if (
+						$this->getFileIdentifier($file->getBasename())
+						&& (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())
+					) {
 						return true;
 					}
 
@@ -241,6 +244,6 @@ class MigrationsManager
 					exit;
 			}
 
-		} while($selectedChoice != 'Ignore Error');
+		} while ($selectedChoice != 'Ignore Error');
 	}
 }
