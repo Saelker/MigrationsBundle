@@ -1,7 +1,10 @@
 services:
     Saelker\MigrationsBundle\MigrationsManager:
         class: Saelker\MigrationsBundle\MigrationsManager
-        arguments: ["@doctrine.orm.default_entity_manager", "@service_container"]
+        arguments: ["@doctrine.orm.default_entity_manager", "@service_container", ""]
 
     Saelker\MigrationsBundle\Helper\DirectoryHelper:
         class: Saelker\MigrationsBundle\Helper\DirectoryHelper
+
+    Saelker\MigrationsBundle\Helper\ConnectionHelper:
+        autowire: true

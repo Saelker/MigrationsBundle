@@ -5,6 +5,7 @@ namespace Saelker\MigrationsBundle\Util;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;
+use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class MigrationFile
@@ -35,6 +36,11 @@ abstract class MigrationFile
 	protected $container;
 
 	/**
+	 * @var ConnectionHelper
+	 */
+	protected $connectionHelper;
+
+	/**
 	 * MigrationFile constructor.
 	 * @param EntityManager $em
 	 * @param ContainerInterface $container
@@ -43,6 +49,7 @@ abstract class MigrationFile
 	{
 		$this->em = $em;
 		$this->container = $container;
+		$this->connectionHelper = $container->get(ConnectionHelper::class);
 	}
 
 	/**
@@ -52,7 +59,7 @@ abstract class MigrationFile
 	{
 		// Execute all statements in transaction
 		$this->em->getConnection()->transactional(function () {
-			$this->resetEntityManager();
+			$this->connectionHelper->resetEntityManager();
 
 			$this->preUp();
 
@@ -173,19 +180,6 @@ abstract class MigrationFile
 		}
 
 		return $this;
-	}
-
-	/**
-	 *
-	 */
-	private function resetEntityManager()
-	{
-		$this->em = $this->em->create(
-			$this->em->getConnection(),
-			$this->em->getConfiguration()
-		);
-
-		$this->em->clear();
 	}
 
 	/**

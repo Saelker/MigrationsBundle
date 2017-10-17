@@ -19,7 +19,7 @@ class V_<identifier>_<description> extends MigrationFile
 {
 	public function up()
 	{
-		// this is auto-generated
+		
 	}
 }';
 
