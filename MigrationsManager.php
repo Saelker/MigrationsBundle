@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Util\ImportFile;
+use Saelker\MigrationsBundle\Util\MigrationDirectory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -18,7 +19,7 @@ class MigrationsManager
 	private $em;
 
 	/**
-	 * @var \string[]
+	 * @var MigrationDirectory[]
 	 */
 	private $directories;
 
@@ -28,38 +29,51 @@ class MigrationsManager
 	private $container;
 
 	/**
-	 * @var bool
-	 */
-	private $ignoreErrors;
-
-	/**
 	 * MigrationsManager constructor.
 	 * @param EntityManager $em
 	 * @param ContainerInterface $container
-	 * @param bool $ignoreErrors
 	 */
-	public function __construct(EntityManager $em, ContainerInterface $container, $ignoreErrors)
+	public function __construct(EntityManager $em, ContainerInterface $container)
 	{
 		$this->em = $em;
 		$this->container = $container;
-		$this->ignoreErrors = $ignoreErrors;
 	}
 
 	/**
 	 * @param \string $directory
+	 * @param integer $priority
 	 * @return $this
 	 */
-	public function addDirectory($directory)
+	public function addDirectory($directory, $priority = null)
 	{
-		$this->directories[] = $directory;
+		$this->directories[] = new MigrationDirectory($directory, $priority);
+
+		usort($this->directories, function (MigrationDirectory $a, MigrationDirectory $b) {
+			if ($a->getPriority() == $b->getPriority()) {
+				return 0;
+			}
+
+			return ($a->getPriority() < $b->getPriority()) ? -1 : 1;
+		});
 
 		return $this;
 	}
 
 	/**
+	 * @deprecated use getMigrationDirectories()
 	 * @return \string[]
 	 */
 	public function getDirectories()
+	{
+		return array_map(function (MigrationDirectory $migrationDirectory) {
+			return $migrationDirectory->getDirectory();
+		}, $this->directories);
+	}
+
+	/**
+	 * @return MigrationDirectory[]
+	 */
+	public function getMigrationDirectories()
 	{
 		return $this->directories;
 	}
@@ -139,9 +153,7 @@ class MigrationsManager
 					// Start migration
 					$file->migrate();
 				} catch (\Exception $e) {
-					if (!$this->ignoreErrors) {
-						throw new \Exception('Error ' . $e);
-					}
+					$this->handleError($e, $io);
 				}
 
 				// Generate DB Entry
@@ -198,5 +210,37 @@ class MigrationsManager
 		preg_match('/V_(\d*)_.*/', $basename, $hits);
 
 		return !empty($hits) ? $hits[1] : false;
+	}
+
+	/**
+	 * @param \Exception $exception
+	 * @param SymfonyStyle $io
+	 * @throws \Exception
+	 */
+	private function handleError(\Exception $exception, SymfonyStyle $io)
+	{
+		$io->error('Oops, there is an error :(');
+
+		$errorChoices = [
+			0 => 'Display Error',
+			1 => 'Ignore Error',
+			2 => 'Exit'
+		];
+
+		do {
+			$io->newLine(1);
+			$selectedChoice = $io->choice(' Whats to do next?', $errorChoices);
+
+			switch ($selectedChoice) {
+				case 'Display Error':
+					$io->newLine(1);
+					$io->error($exception->getMessage());
+					break;
+				case 'Exit':
+					$io->warning('Exit migration');
+					exit;
+			}
+
+		} while($selectedChoice != 'Ignore Error');
 	}
 }

@@ -36,10 +36,6 @@ class SaelkerMigrationsExtension extends Extension
 		$directoryHelper->addArgument($config['clean_depth']);
 		$directoryHelper->addArgument($config['directory_separator']);
 		$directoryHelper->addArgument($config['use_camel_case']);
-
-		// Add ignore errors to migrations manager
-		$migrationsManager = $container->getDefinition(MigrationsManager::class);
-		$migrationsManager->addArgument($config['ignore_errors']);
 	}
 
 	/**

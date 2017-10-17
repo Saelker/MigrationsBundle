@@ -3,6 +3,7 @@
 namespace Saelker\MigrationsBundle\Command;
 
 use Saelker\MigrationsBundle\MigrationsManager;
+use Saelker\MigrationsBundle\Util\MigrationDirectory;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,11 +30,21 @@ class MigrationsInfoCommand extends ContainerAwareCommand
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		/** @var MigrationsManager $migrationsManager */
 		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
 
 		$io = new SymfonyStyle($input, $output);
 
 		$io->title('Directories');
-		$io->listing($migrationsManager->getDirectories());
+
+		$migrationDirectories = $migrationsManager->getMigrationDirectories();
+		$directoryStrings = [];
+
+		/** @var MigrationDirectory $migrationDirectory */
+		foreach ($migrationDirectories as $migrationDirectory) {
+			$directoryStrings[] = "Priority: {$migrationDirectory->getPriority()} - Path: {$migrationDirectory->getDirectory()}";
+		}
+
+		$io->listing($directoryStrings);
 	}
 }

@@ -14,16 +14,23 @@ class MigrationsCompilerPass implements CompilerPassInterface
 	private $directory;
 
 	/**
+	 * @var integer
+	 */
+	private $priority;
+
+	/**
 	 * MigrationsCompilerPass constructor.
 	 * @param $directory
+	 * @param integer $priority
 	 */
-	public function __construct($directory)
+	public function __construct($directory, $priority = null)
 	{
 		$this->directory = $directory;
+		$this->priority = $priority;
 	}
 
 	public function process(ContainerBuilder $container)
 	{
-		$container->getDefinition(MigrationsManager::class)->addMethodCall('addDirectory', [$this->directory]);
+		$container->getDefinition(MigrationsManager::class)->addMethodCall('addDirectory', [$this->directory, $this->priority]);
 	}
 }
