@@ -32,6 +32,11 @@ class Migration
 	 */
 	private $sequence;
 
+	/**
+	 * @var string
+	 */
+	private $note;
+
 
 	/**
 	 * Get id
@@ -53,7 +58,7 @@ class Migration
 
 	/**
 	 * @param string $identifier
-	 * @return $this
+	 * @return Migration
 	 */
 	public function setIdentifier($identifier)
 	{
@@ -72,7 +77,7 @@ class Migration
 
 	/**
 	 * @param string $directory
-	 * @return $this
+	 * @return Migration
 	 */
 	public function setDirectory($directory)
 	{
@@ -91,7 +96,7 @@ class Migration
 
 	/**
 	 * @param \DateTime $createdAt
-	 * @return $this
+	 * @return Migration
 	 */
 	public function setCreatedAt($createdAt)
 	{
@@ -110,9 +115,29 @@ class Migration
 
 	/**
 	 * @param int $sequence
+	 * @return Migration
 	 */
 	public function setSequence($sequence)
 	{
 		$this->sequence = $sequence;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getNote(): string
+	{
+		return $this->note;
+	}
+
+	/**
+	 * @param string $note
+	 * @return Migration
+	 */
+	public function setNote($note)
+	{
+		$this->note = $note;
+		return $this;
 	}
 }
