@@ -9,6 +9,7 @@ use Saelker\MigrationsBundle\Util\GenerateMigration;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsGenerateCommand extends ContainerAwareCommand
@@ -43,9 +44,10 @@ class MigrationsGenerateCommand extends ContainerAwareCommand
 		$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
 		$namespace = $io->ask('Namespace', GenerateMigration::getNamespaceFromDirectory($directory));
 		$description = $io->ask('Description');
+		$note = $io->ask('Note', false);
 
 		// Generate file
-		$file = GenerateMigration::generate($namespace, $repo->getNextIdentifier($directory), $description, $directory);
+		$file = GenerateMigration::generate($namespace, $repo->getNextIdentifier($directory), $description, $directory, $note);
 
 		$io->success('Migration file was generated: ' . $file);
 	}

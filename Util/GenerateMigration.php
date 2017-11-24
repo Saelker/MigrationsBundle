@@ -17,6 +17,8 @@ use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_<identifier>_<description> extends MigrationFile
 {
+	const NOTE = "<note>";
+	
 	public function up()
 	{
 		
@@ -28,9 +30,10 @@ class V_<identifier>_<description> extends MigrationFile
 	 * @param string $identifier
 	 * @param string $description
 	 * @param string $directory
+	 * @param $note
 	 * @return string
 	 */
-	public static function generate($namespace, $identifier, $description, $directory)
+	public static function generate($namespace, $identifier, $description, $directory, $note)
 	{
 		$description = self::toCamelCase($description);
 
@@ -38,12 +41,14 @@ class V_<identifier>_<description> extends MigrationFile
 			'<namespace>',
 			'<identifier>',
 			'<description>',
+			'<note>',
 		];
 
 		$replacements = [
 			$namespace,
 			$identifier,
 			$description,
+			str_replace("\"", "'", $note)
 		];
 
 		$code = str_replace($placeHolders, $replacements, self::$template);
