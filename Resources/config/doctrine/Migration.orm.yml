@@ -24,4 +24,7 @@ Saelker\MigrationsBundle\Entity\Migration:
         sequence:
             type: integer
             column: sequence
+        note:
+            type: string
+            column: note
     lifecycleCallbacks: {  }
