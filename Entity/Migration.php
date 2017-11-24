@@ -126,7 +126,7 @@ class Migration
 	/**
 	 * @return string
 	 */
-	public function getNote(): string
+	public function getNote()
 	{
 		return $this->note;
 	}
