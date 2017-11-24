@@ -52,7 +52,7 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 	 */
 	public function getNextIdentifier($directory)
 	{
-		$todayIdentifier = (new \DateTime())->format('Ymd');
+		$currentIdentifier = (new \DateTime())->format('YmdHis');
 
 		$sort = function (\SplFileInfo $a, \SplFileInfo $b) {
 			return strcmp($b->getRealPath(), $a->getRealPath());
@@ -65,14 +65,15 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 			->name('/V_\d*_.*/')
 			->sort($sort);
 
+
 		if ($finder->getIterator()->current()) {
 			$lastFile = new ImportFile($finder->getIterator()->current(), null, null);
-			$newNumber = substr($lastFile->getFileIdentifier(), 0, -3) == $todayIdentifier ? intval(substr($lastFile->getFileIdentifier(), -3)) + 1 : 1;
+			$newNumber = substr($lastFile->getFileIdentifier(), 0, -3) == $currentIdentifier ? intval(substr($lastFile->getFileIdentifier(), -3)) + 1 : $currentIdentifier;
 		} else {
 			$newNumber = 1;
 		}
 
-		return $todayIdentifier . sprintf('%03d', $newNumber);
+		return $currentIdentifier . sprintf('%03d', $newNumber);
 	}
 
 	/**
