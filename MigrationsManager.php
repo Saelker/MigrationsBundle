@@ -265,6 +265,7 @@ class MigrationsManager
 			return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
 		});
 
+		$newNotes = [];
 		if ($files) {
 			// Execute migrations Files
 			$io->progressStart(count($files));
@@ -293,6 +294,11 @@ class MigrationsManager
 					->setCreatedAt(new \DateTime())
 					->setSequence($sequence);
 
+				if($note = $file->getNote()) {
+					$migration->setNote($note);
+					$newNotes[$file->getFileIdentifier()] = $note;
+				}
+
 				$this->em->persist($migration);
 				$this->em->flush();
 
@@ -305,6 +311,18 @@ class MigrationsManager
 
 		} else {
 			$io->success('Everything is up to date.');
+		}
+
+		if(!empty($newNotes)) {
+			$io->section("Migration Notes");
+			$noteNumber = 1;
+
+			foreach($newNotes as $identifier => $note)
+			{
+				$io->section("{$noteNumber}: V_" . $identifier);
+				$io->note($note);
+				$noteNumber++;
+			}
 		}
 
 		return $this;
