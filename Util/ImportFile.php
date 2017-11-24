@@ -62,6 +62,17 @@ class ImportFile
 	}
 
 	/**
+	 * @return string|bool
+	 */
+	public function getNote()
+	{
+		$pattern = '/const NOTE = "(.*)";/';
+		preg_match($pattern, $this->file->getContents(), $hits);
+
+		return !empty($hits) ? $hits[1] : false;
+	}
+
+	/**
 	 * @return MigrationFile
 	 */
 	private function getInstance()

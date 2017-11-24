@@ -169,9 +169,12 @@ class MigrationsManager
 					->setCreatedAt(new \DateTime())
 					->setSequence($sequence);
 
+				if($note = $file->getNote()) {
+					$migration->setNote($note);
+				}
+
 				$this->em->persist($migration);
 				$this->em->flush();
-
 			}
 
 			$io->progressFinish();
