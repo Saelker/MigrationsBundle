@@ -22,8 +22,22 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 	{
 		return $this
 			->getIdentifierQueryBuilder($directory)
+			->setMaxResults(1)
 			->getQuery()
 			->getOneOrNullResult();
+	}
+
+	/**
+	 * @param $directory
+	 * @return array
+	 */
+	public function getAllMigrationIdentifiers($directory)
+	{
+		return $this
+			->getIdentifierQueryBuilder($directory)
+			->select('m.identifier')
+			->getQuery()
+			->getResult();
 	}
 
 	/**
@@ -85,7 +99,6 @@ class MigrationRepository extends \Doctrine\ORM\EntityRepository
 		return $this
 			->createQueryBuilder('m')
 			->andWhere('m.directory = :directory')
-			->setMaxResults(1)
 			->orderBy('m.identifier', 'DESC')
 			->setParameter('directory', $directory);
 	}
