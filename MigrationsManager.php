@@ -209,13 +209,13 @@ class MigrationsManager
 	 * @return $this
 	 * @throws \Exception
 	 */
-	public function migrateDev(SymfonyStyle $io, $directory = null)
+	public function migrateFull(SymfonyStyle $io, $directory = null)
 	{
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
 		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
-		$io->note('!!! DEVELOPMENT !!!');
+		$io->warning('!!! FULL-MIGRATION !!!');
 		$io->title('Starting migrations, directories:');
 
 		/** @var ImportFile[] $files */
