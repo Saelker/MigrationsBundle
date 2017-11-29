@@ -33,12 +33,6 @@ class Migration
 	private $sequence;
 
 	/**
-	 * @var string
-	 */
-	private $note;
-
-
-	/**
 	 * Get id
 	 *
 	 * @return int
@@ -120,24 +114,6 @@ class Migration
 	public function setSequence($sequence)
 	{
 		$this->sequence = $sequence;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getNote()
-	{
-		return $this->note;
-	}
-
-	/**
-	 * @param string $note
-	 * @return Migration
-	 */
-	public function setNote($note)
-	{
-		$this->note = $note;
 		return $this;
 	}
 }
