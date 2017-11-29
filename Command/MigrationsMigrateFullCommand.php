@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class MigrationsMigrateDevCommand extends ContainerAwareCommand
+class MigrationsMigrateFullCommand extends ContainerAwareCommand
 {
 	/**
 	 * @inheritdoc
@@ -20,7 +20,7 @@ class MigrationsMigrateDevCommand extends ContainerAwareCommand
 		parent::configure();
 
 		$this
-			->setName('saelker:migrations:migrate:dev')
+			->setName('saelker:migrations:migrate:full')
 			->addOption(
 				'select-directory',
 				null,
@@ -47,6 +47,6 @@ class MigrationsMigrateDevCommand extends ContainerAwareCommand
 			$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
 		}
 
-		$migrationsManager->migrateDev($io, $directory);
+		$migrationsManager->migrateFull($io, $directory);
 	}
 }
