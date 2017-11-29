@@ -172,7 +172,6 @@ class MigrationsManager
 					->setSequence($sequence);
 
 				if($note = $file->getNote()) {
-					$migration->setNote($note);
 					$newNotes[$file->getFileIdentifier()] = $note;
 				}
 
@@ -295,7 +294,6 @@ class MigrationsManager
 					->setSequence($sequence);
 
 				if($note = $file->getNote()) {
-					$migration->setNote($note);
 					$newNotes[$file->getFileIdentifier()] = $note;
 				}
 
