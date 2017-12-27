@@ -4,6 +4,8 @@ namespace Saelker\MigrationsBundle\Helper;
 
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+
 
 class ConnectionHelper
 {
@@ -21,7 +23,7 @@ class ConnectionHelper
 	 * ConnectionHelper constructor.
 	 * @param EntityManager $entityManager
 	 */
-	public function __construct(EntityManager $entityManager)
+	public function __construct(EntityManagerInterface $entityManager)
 	{
 		$this->em = $entityManager;
 		$this->schemaManager = $entityManager->getConnection()->getSchemaManager();
