@@ -2,9 +2,32 @@ services:
     Saelker\MigrationsBundle\MigrationsManager:
         class: Saelker\MigrationsBundle\MigrationsManager
         arguments: ["@doctrine.orm.default_entity_manager", "@service_container", ""]
+        public: true
 
     Saelker\MigrationsBundle\Helper\DirectoryHelper:
         class: Saelker\MigrationsBundle\Helper\DirectoryHelper
+        public: true
 
     Saelker\MigrationsBundle\Helper\ConnectionHelper:
         autowire: true
+        public: true
+
+    Saelker\MigrationsBundle\Command\MigrationsGenerateCommand:
+        autowire: true
+        tags: [console.command]
+
+    Saelker\MigrationsBundle\Command\MigrationsInfoCommand:
+        autowire: true
+        tags: [console.command]
+
+    Saelker\MigrationsBundle\Command\MigrationsMigrateCommand:
+        autowire: true
+        tags: [console.command]
+
+    Saelker\MigrationsBundle\Command\MigrationsMigrateFullCommand:
+        autowire: true
+        tags: [console.command]
+
+    Saelker\MigrationsBundle\Command\MigrationsRollbackCommand:
+        autowire: true
+        tags: [console.command]
