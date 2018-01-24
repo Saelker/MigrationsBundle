@@ -42,11 +42,11 @@ class ConnectionHelper
 	}
 
 	/**
-	 * @param array $tables
+	 * @param $tables
 	 *
 	 * @return bool
 	 */
-	public function tablesExists(array $tables): bool
+	public function tablesExists($tables): bool
 	{
 		return $this->schemaManager->tablesExist($tables);
 	}
