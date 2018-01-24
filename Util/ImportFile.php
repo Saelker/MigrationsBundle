@@ -76,7 +76,7 @@ class ImportFile
 	/**
 	 * @return MigrationFile
 	 */
-	private function getInstance(): MigrationFile
+	public function getInstance(): MigrationFile
 	{
 		if (!$this->instance) {
 			$class = $this->getNamespace() . "\\" . $this->getClassName();

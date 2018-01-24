@@ -4,6 +4,7 @@ namespace Saelker\MigrationsBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Helper\DependencyHelper;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\ImportFile;
@@ -30,14 +31,30 @@ class MigrationsManager
 	private $container;
 
 	/**
+	 * @var DependencyHelper
+	 */
+	private $dependencyHelper;
+
+	/**
+	 * @var DirectoryHelper
+	 */
+	private $directoryHelper;
+
+	/**
 	 * MigrationsManager constructor.
+	 *
 	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
+	 * @param DependencyHelper $dependencyHelper
+	 * @param DirectoryHelper $directoryHelper
 	 */
-	public function __construct(EntityManagerInterface $em, ContainerInterface $container)
+	public function __construct(EntityManagerInterface $em, ContainerInterface $container,
+								DependencyHelper $dependencyHelper, DirectoryHelper $directoryHelper)
 	{
 		$this->em = $em;
 		$this->container = $container;
+		$this->dependencyHelper = $dependencyHelper;
+		$this->directoryHelper = $directoryHelper;
 	}
 
 	/**
@@ -89,114 +106,34 @@ class MigrationsManager
 	{
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
-		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
 		$io->title('Starting migration, directories:');
 
 		/** @var ImportFile[] $files */
-		$files = [];
+		$files = $this->fetchFiles($io, $directory, function (string $directory) use ($repo): \Closure {
 
-		$directories = $directory ? [$directory] : $this->getDirectories();
-		$io->listing($directories);
-
-		foreach ($directories as $directory) {
-			// Check if directory exists
-			if (is_dir($directory)) {
-
-				// Get Migration Files
-				// Get Last Identifier
-				// Reject Migrations Files
-				// Execute Migrations Files & Write migration entries
-				try {
-					$latestMigration = $repo->getLatestMigration($directoryHelper->getCleanedPath($directory));
-				} catch (\Exception $e) {
-					$latestMigration = null;
-				}
-
-				$finder = new Finder();
-				$finder->files()->in($directory);
-				$finder->filter(function (\SplFileInfo $file) use ($latestMigration) {
-					if (
-						$this->getFileIdentifier($file->getBasename())
-						&& (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())
-					) {
-						return true;
-					}
-
-					return false;
-				});
-
-				foreach ($finder as $file) {
-					$files[] = new ImportFile($file, $this->em, $this->container);
-				}
-			} else {
-				$io->error('Directory not found: ' . $directory);
-				return $this;
+			try {
+				$latestMigration = $repo->getLatestMigration($this->directoryHelper->getCleanedPath($directory));
+			} catch (\Exception $e) {
+				$latestMigration = null;
 			}
-		}
 
-		$files = array_unique($files);
+			return function (\SplFileInfo $file) use ($latestMigration) {
+				if (
+					$this->getFileIdentifier($file->getBasename())
+					&& (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())
+				) {
+					return true;
+				}
 
-		usort($files, function (ImportFile $x, ImportFile $y) {
-			return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
+				return false;
+			};
 		});
 
-		$newNotes = [];
-
 		if ($files) {
-			// Execute migrations Files
-			$io->progressStart(count($files));
-
-			// Get new Sequence
-			$sequence = $repo->getLatestSequence();
-			$sequence++;
-
-			/** @var ImportFile $file */
-			foreach ($files as $file) {
-				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename() . "</info>");
-				$io->progressAdvance(1);
-
-				try {
-					// Start migration
-					$file->migrate();
-				} catch (\Exception $e) {
-					$this->handleError($e, $io);
-				}
-
-				// Generate DB Entry
-				$migration = new Migration();
-				$migration
-					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
-					->setIdentifier($file->getFileIdentifier())
-					->setCreatedAt(new \DateTime())
-					->setSequence($sequence);
-
-				if($note = $file->getNote()) {
-					$newNotes[$file->getFileIdentifier()] = $note;
-				}
-
-				$this->em->persist($migration);
-				$this->em->flush();
-			}
-
-			$io->progressFinish();
-
-			$io->success('Finished, ' . count($files) . " files imported.");
-
+			$this->migrateFiles($io, $files);
 		} else {
 			$io->success('Everything is up to date.');
-		}
-
-		if(!empty($newNotes)) {
-			$io->section("Migration Notes");
-			$noteNumber = 1;
-
-			foreach($newNotes as $identifier => $note)
-			{
-				$io->section("{$noteNumber}: V_" . $identifier);
-				$io->note($note);
-				$noteNumber++;
-			}
 		}
 
 		return $this;
@@ -212,10 +149,69 @@ class MigrationsManager
 	{
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
-		$directoryHelper = $this->container->get(DirectoryHelper::class);
 
 		$io->warning('!!! FULL-MIGRATION !!!');
 		$io->title('Starting migrations, directories:');
+
+		/** @var ImportFile[] $files */
+		$files = $this->fetchFiles($io, $directory, function (string $directory) use ($repo): \Closure {
+
+			$doneMigrationIdentifiers = [];
+			foreach($repo->getAllMigrationIdentifiers($this->directoryHelper->getCleanedPath($directory)) as $migration) {
+				$doneMigrationIdentifiers[] = $migration['identifier'];
+			}
+
+			return function (\SplFileInfo $file) use ($doneMigrationIdentifiers) {
+				if (
+					$this->getFileIdentifier($file->getBasename())
+					&& !in_array($this->getFileIdentifier($file->getBasename()), $doneMigrationIdentifiers)
+				) {
+					return true;
+				}
+
+				return false;
+			};
+		});
+
+		if ($files) {
+			$this->migrateFiles($io, $files);
+		} else {
+			$io->success('Everything is up to date.');
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @param SymfonyStyle $io
+	 * @return $this
+	 */
+	public function rollback(SymfonyStyle $io)
+	{
+		/** @var MigrationRepository $repo */
+		$repo = $this->em->getRepository(Migration::class);
+
+		$sequence = $repo->getLatestSequence();
+		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
+
+		/** @var ImportFile[] $files */
+		$files = [];
+
+		//TODO Rolback
+
+		return $this;
+	}
+
+	/**
+	 * @param SymfonyStyle $io
+	 * @param null|string $directory
+	 * @param \Closure $filterFn
+	 * @return array
+	 */
+	private function fetchFiles(SymfonyStyle $io, ?string $directory, \Closure $filterFn): array
+	{
+		/** @var MigrationRepository $repo */
+		$repo = $this->em->getRepository(Migration::class);
 
 		/** @var ImportFile[] $files */
 		$files = [];
@@ -231,30 +227,16 @@ class MigrationsManager
 				// Get All Done Identifiers
 				// Reject Migrations Files
 				// Execute Migrations Files & Write migration entries
-				$doneMigrationIdentifiers = [];
-				foreach($repo->getAllMigrationIdentifiers($directoryHelper->getCleanedPath($directory)) as $migration) {
-					$doneMigrationIdentifiers[] = $migration['identifier'];
-				}
-
 				$finder = new Finder();
 				$finder->files()->in($directory);
-				$finder->filter(function (\SplFileInfo $file) use ($doneMigrationIdentifiers) {
-					if (
-						$this->getFileIdentifier($file->getBasename())
-						&& !in_array($this->getFileIdentifier($file->getBasename()), $doneMigrationIdentifiers)
-					) {
-						return true;
-					}
-
-					return false;
-				});
+				$finder->filter($filterFn($directory));
 
 				foreach ($finder as $file) {
 					$files[] = new ImportFile($file, $this->em, $this->container);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
-				return $this;
+				return [];
 			}
 		}
 
@@ -264,87 +246,73 @@ class MigrationsManager
 			return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
 		});
 
-		$newNotes = [];
-		if ($files) {
-			// Execute migrations Files
-			$io->progressStart(count($files));
-
-			// Get new Sequence
-			$sequence = $repo->getLatestSequence();
-			$sequence++;
-
-			/** @var ImportFile $file */
-			foreach ($files as $file) {
-				$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename() . "</info>");
-				$io->progressAdvance(1);
-
-				try {
-					// Start migration
-					$file->migrate();
-				} catch (\Exception $e) {
-					$this->handleError($e, $io);
-				}
-
-				// Generate DB Entry
-				$migration = new Migration();
-				$migration
-					->setDirectory($directoryHelper->getCleanedPath($file->getFile()->getPath()))
-					->setIdentifier($file->getFileIdentifier())
-					->setCreatedAt(new \DateTime())
-					->setSequence($sequence);
-
-				if($note = $file->getNote()) {
-					$newNotes[$file->getFileIdentifier()] = $note;
-				}
-
-				$this->em->persist($migration);
-				$this->em->flush();
-
-			}
-
-			$io->progressFinish();
-
-			$io->success('Finished, ' . count($files) . " files imported.");
-
-
-		} else {
-			$io->success('Everything is up to date.');
-		}
-
-		if(!empty($newNotes)) {
-			$io->section("Migration Notes");
-			$noteNumber = 1;
-
-			foreach($newNotes as $identifier => $note)
-			{
-				$io->section("{$noteNumber}: V_" . $identifier);
-				$io->note($note);
-				$noteNumber++;
-			}
-		}
-
-		return $this;
+		return $files;
 	}
 
 	/**
 	 * @param SymfonyStyle $io
-	 * @return $this
+	 * @param array $files
+	 *
+	 * @throws \Exception
 	 */
-	public function rollback(SymfonyStyle $io)
+	private function migrateFiles(SymfonyStyle $io, array $files): void
 	{
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
-		$directoryHelper = $this->container->get(DirectoryHelper::class);
+		$notes = [];
 
+		// Execute migrations Files
+		$io->progressStart(count($files));
+
+		// Get new Sequence
 		$sequence = $repo->getLatestSequence();
-		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
+		$sequence++;
 
-		/** @var ImportFile[] $files */
-		$files = [];
+		$files = $this->dependencyHelper->resolveDependencies($files);
 
-		//TODO Rolback
+		/** @var ImportFile $file */
+		foreach ($files as $file) {
+			$io->writeln("\r<info> - Importing file: " . $file->getFile()->getBasename() . "</info>");
+			$io->progressAdvance(1);
 
-		return $this;
+			try {
+				// Start migration
+				$file->migrate();
+			} catch (\Exception $e) {
+				$this->handleError($e, $io);
+			}
+
+			// Generate DB Entry
+			$migration = new Migration();
+			$migration
+				->setDirectory($this->directoryHelper->getCleanedPath($file->getFile()->getPath()))
+				->setIdentifier($file->getFileIdentifier())
+				->setCreatedAt(new \DateTime())
+				->setSequence($sequence);
+
+			if($note = $file->getNote()) {
+				$notes[$file->getFileIdentifier()] = $note;
+			}
+
+			$this->em->persist($migration);
+			$this->em->flush();
+		}
+
+		$io->progressFinish();
+		$io->success('Finished, ' . count($files) . " files imported.");
+
+		// Show Notes
+		if(!empty($notes)) {
+			$io->section("Migration Notes");
+			$noteNumber = 1;
+
+			foreach($notes as $identifier => $note)
+			{
+				$io->section($noteNumber++ . ": V_" . $identifier);
+				$io->note($note);
+			}
+		}
+
 	}
 
 	/**

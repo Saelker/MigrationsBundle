@@ -41,6 +41,21 @@ abstract class MigrationFile
 	protected $connectionHelper;
 
 	/**
+	 * @var string|null
+	 */
+	protected $dependency;
+
+	/**
+	 * @var string|null
+	 */
+	protected $dependencyResolution;
+
+	/**
+	 * @var int
+	 */
+	protected $migrationOrder = 0;
+
+	/**
 	 * MigrationFile constructor.
 	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
@@ -50,6 +65,8 @@ abstract class MigrationFile
 		$this->em = $em;
 		$this->container = $container;
 		$this->connectionHelper = $container->get(ConnectionHelper::class);
+
+		$this->init();
 	}
 
 	/**
@@ -196,6 +213,70 @@ abstract class MigrationFile
 	}
 
 	/**
+	 * @return null|string
+	 */
+	public function getDependency(): ?string
+	{
+		return $this->dependency;
+	}
+
+	/**
+	 * @param null|string $dependency
+	 *
+	 * @return MigrationFile
+	 */
+	public function setDependency(?string $dependency): MigrationFile
+	{
+		$this->dependency = $dependency;
+		return $this;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getDependencyResolution(): ?string
+	{
+		return $this->dependencyResolution;
+	}
+
+	/**
+	 * @param null|string $dependencyResolution
+	 *
+	 * @return MigrationFile
+	 */
+	public function setDependencyResolution(?string $dependencyResolution): MigrationFile
+	{
+		$this->dependencyResolution = $dependencyResolution;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getMigrationOrder(): int
+	{
+		return $this->migrationOrder;
+	}
+
+	/**
+	 * @param int $migrationOrder
+	 * @return MigrationFile
+	 */
+	public function setMigrationOrder(int $migrationOrder): MigrationFile
+	{
+		$this->migrationOrder = $migrationOrder;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getClassName(): string
+	{
+		return static::class;
+	}
+
+	/**
 	 *
 	 */
 	abstract public function up();
@@ -211,6 +292,13 @@ abstract class MigrationFile
 	 *
 	 */
 	public function postUp()
+	{
+	}
+
+	/**
+	 *
+	 */
+	public function init(): void
 	{
 	}
 }
