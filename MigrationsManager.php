@@ -291,7 +291,7 @@ class MigrationsManager
 				->setSequence($sequence);
 
 			if($note = $file->getNote()) {
-				$notes[$file->getFileIdentifier()] = $note;
+				$notes[$file->getInstance()->getClassName()] = $note;
 			}
 
 			$this->em->persist($migration);
@@ -308,7 +308,7 @@ class MigrationsManager
 
 			foreach($notes as $identifier => $note)
 			{
-				$io->section($noteNumber++ . ": V_" . $identifier);
+				$io->section($noteNumber++ . ": ". $identifier);
 				$io->note($note);
 			}
 		}
