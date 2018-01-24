@@ -345,7 +345,6 @@ class MigrationsManager
 			$io->newLine(1);
 			$selectedChoice = $io->choice(' Whats to do next?', $errorChoices);
 
-
 			switch ($selectedChoice) {
 				case 'Display Error':
 					$io->newLine(1);
