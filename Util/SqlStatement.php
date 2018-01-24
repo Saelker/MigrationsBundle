@@ -16,10 +16,11 @@ class SqlStatement
 
 	/**
 	 * SqlStatement constructor.
+	 *
 	 * @param string $sql
 	 * @param array $params
 	 */
-	public function __construct($sql, $params)
+	public function __construct(string $sql, ?array $params)
 	{
 		$this->sql = $sql;
 		$this->params = $params;
@@ -28,15 +29,15 @@ class SqlStatement
 	/**
 	 * @return string
 	 */
-	public function getSql()
+	public function getSql(): string
 	{
 		return $this->sql;
 	}
 
 	/**
-	 * @return array
+	 * @return array|null
 	 */
-	public function getParams()
+	public function getParams(): ?array
 	{
 		return $this->params;
 	}

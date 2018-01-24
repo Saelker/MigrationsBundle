@@ -2,8 +2,7 @@
 
 namespace Saelker\MigrationsBundle\Util;
 
-
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -20,7 +19,7 @@ class ImportFile
 	private $instance;
 
 	/**
-	 * @var EntityManager
+	 * @var EntityManagerInterface
 	 */
 	private $em;
 
@@ -32,10 +31,10 @@ class ImportFile
 	/**
 	 * ImportFile constructor.
 	 * @param SplFileInfo $file
-	 * @param EntityManager $entityManager
+	 * @param EntityManagerInterface $entityManager
 	 * @param ContainerInterface $container
 	 */
-	public function __construct(SplFileInfo $file, ?EntityManager $entityManager, ?ContainerInterface $container)
+	public function __construct(SplFileInfo $file, ?EntityManagerInterface $entityManager, ?ContainerInterface $container)
 	{
 		$this->file = $file;
 		$this->em = $entityManager;
@@ -51,9 +50,11 @@ class ImportFile
 	}
 
 	/**
-	 * @return $this
+	 * @return ImportFile
+	 *
+	 * @throws \Exception
 	 */
-	public function migrate()
+	public function migrate(): ImportFile
 	{
 		$instance = $this->getInstance();
 		$instance->executeUp();
@@ -62,20 +63,20 @@ class ImportFile
 	}
 
 	/**
-	 * @return string|bool
+	 * @return string|null
 	 */
-	public function getNote()
+	public function getNote(): ?string
 	{
 		$pattern = '/const NOTE = "(.*)";/';
 		preg_match($pattern, $this->file->getContents(), $hits);
 
-		return !empty($hits) ? $hits[1] : false;
+		return !empty($hits) ? $hits[1] : null;
 	}
 
 	/**
 	 * @return MigrationFile
 	 */
-	private function getInstance()
+	private function getInstance(): MigrationFile
 	{
 		if (!$this->instance) {
 			$class = $this->getNamespace() . "\\" . $this->getClassName();
@@ -87,38 +88,41 @@ class ImportFile
 	}
 
 	/**
-	 * @return string|bool
+	 * @return string|null
 	 */
-	private function getNamespace()
+	private function getNamespace(): ?string
 	{
 		$pattern = "/namespace (.*);/";
 		preg_match($pattern, $this->file->getContents(), $hits);
 
-		return !empty($hits) ? $hits[1] : false;
+		return !empty($hits) ? $hits[1] : null;
 	}
 
 	/**
-	 * @return string|bool
+	 * @return string|null
 	 */
-	private function getClassName()
+	private function getClassName(): ?string
 	{
 		$pattern = "/class (\w*)/";
 		preg_match($pattern, $this->file->getContents(), $hits);
 
-		return !empty($hits) ? $hits[1] : false;
+		return !empty($hits) ? $hits[1] : null;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getFileIdentifier(): ?string
+	{
+		preg_match('/V_(\d*)_.*/', $this->file->getBasename(), $hits);
+
+		return !empty($hits) ? $hits[1] : null;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getFileIdentifier()
-	{
-		preg_match('/V_(\d*)_.*/', $this->file->getBasename(), $hits);
-
-		return !empty($hits) ? $hits[1] : false;
-	}
-
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->getFile()->getBasename();
 	}

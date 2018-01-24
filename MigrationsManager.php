@@ -2,7 +2,7 @@
 
 namespace Saelker\MigrationsBundle;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
@@ -15,7 +15,7 @@ use Symfony\Component\Finder\Finder;
 class MigrationsManager
 {
 	/**
-	 * @var EntityManager
+	 * @var EntityManagerInterface
 	 */
 	private $em;
 
@@ -31,10 +31,10 @@ class MigrationsManager
 
 	/**
 	 * MigrationsManager constructor.
-	 * @param EntityManager $em
+	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
 	 */
-	public function __construct(EntityManager $em, ContainerInterface $container)
+	public function __construct(EntityManagerInterface $em, ContainerInterface $container)
 	{
 		$this->em = $em;
 		$this->container = $container;

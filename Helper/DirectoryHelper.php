@@ -21,6 +21,7 @@ class DirectoryHelper
 
 	/**
 	 * DirectoryHelper constructor.
+	 *
 	 * @param $cleanDepth
 	 * @param $directorySeparator
 	 * @param $useCamelCase
@@ -33,10 +34,10 @@ class DirectoryHelper
 	}
 
 	/**
-	 * @param $directory
+	 * @param string $directory
 	 * @return string
 	 */
-	public function getCleanedPath($directory)
+	public function getCleanedPath(string $directory): string
 	{
 		if (!$this->cleanDepth) {
 			return $directory;
@@ -62,7 +63,7 @@ class DirectoryHelper
 	 * @param array $directories
 	 * @return array
 	 */
-	public function getSourceDirectories(array $directories)
+	public function getSourceDirectories(array $directories): array
 	{
 		$srcDirectories = [];
 

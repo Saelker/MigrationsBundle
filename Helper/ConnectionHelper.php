@@ -6,7 +6,6 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 
-
 class ConnectionHelper
 {
 	/**
@@ -21,7 +20,7 @@ class ConnectionHelper
 
 	/**
 	 * ConnectionHelper constructor.
-	 * @param EntityManager $entityManager
+	 * @param EntityManagerInterface $entityManager
 	 */
 	public function __construct(EntityManagerInterface $entityManager)
 	{
@@ -30,9 +29,9 @@ class ConnectionHelper
 	}
 
 	/**
-	 *
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function resetEntityManager()
+	public function resetEntityManager(): void
 	{
 		$this->em = $this->em->create(
 			$this->em->getConnection(),
@@ -43,15 +42,22 @@ class ConnectionHelper
 	}
 
 	/**
-	 * @param $tableName
+	 * @param array $tables
+	 *
 	 * @return bool
 	 */
-	public function tablesExists($tables)
+	public function tablesExists(array $tables): bool
 	{
 		return $this->schemaManager->tablesExist($tables);
 	}
 
-	public function hasColumn($table, $column) {
+	/**
+	 * @param string $table
+	 * @param string $column
+	 * @return bool
+	 */
+	public function hasColumn(string $table, string $column): bool
+	{
 		$tableColumns = $this->schemaManager->listTableColumns($table);
 
 		foreach ($tableColumns as $name => $tableColumn) {

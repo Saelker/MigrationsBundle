@@ -2,7 +2,6 @@
 
 namespace Saelker\MigrationsBundle\Util;
 
-
 class GenerateMigration
 {
 	/**
@@ -30,10 +29,10 @@ class V_<identifier>_<description> extends MigrationFile
 	 * @param string $identifier
 	 * @param string $description
 	 * @param string $directory
-	 * @param $note
+	 * @param string $note
 	 * @return string
 	 */
-	public static function generate($namespace, $identifier, $description, $directory, $note)
+	public static function generate(string $namespace, string $identifier, string $description, string $directory, string $note): string
 	{
 		$description = self::toCamelCase($description);
 
@@ -62,10 +61,10 @@ class V_<identifier>_<description> extends MigrationFile
 	}
 
 	/**
-	 * @param $directory
-	 * @return bool|string
+	 * @param string $directory
+	 * @return null|string
 	 */
-	public static function getNamespaceFromDirectory($directory)
+	public static function getNamespaceFromDirectory(string $directory): ?string
 	{
 		$directories = explode('/', $directory);
 		$key = array_search('src', $directories);
@@ -75,14 +74,14 @@ class V_<identifier>_<description> extends MigrationFile
 			$namespace[] = $directories[$i];
 		}
 
-		return $key ? implode('\\', $namespace) : false;
+		return $key ? implode('\\', $namespace) : null;
 	}
 
 	/**
 	 * @param string $string
 	 * @return string
 	 */
-	private static function toCamelCase($string)
+	private static function toCamelCase(string $string): string
 	{
 		$string = str_replace('-', ' ', $string);
 		$string = str_replace('_', ' ', $string);

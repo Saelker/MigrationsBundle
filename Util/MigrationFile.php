@@ -3,7 +3,7 @@
 namespace Saelker\MigrationsBundle\Util;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class MigrationFile
 {
 	/**
-	 * @var EntityManager
+	 * @var EntityManagerInterface
 	 */
 	protected $em;
 
@@ -42,10 +42,10 @@ abstract class MigrationFile
 
 	/**
 	 * MigrationFile constructor.
-	 * @param EntityManager $em
+	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
 	 */
-	public function __construct(EntityManager $em, ContainerInterface $container)
+	public function __construct(EntityManagerInterface $em, ContainerInterface $container)
 	{
 		$this->em = $em;
 		$this->container = $container;
@@ -54,8 +54,10 @@ abstract class MigrationFile
 
 	/**
 	 * @return MigrationFile
+	 *
+	 * @throws \Exception
 	 */
-	public function executeUp()
+	public function executeUp(): MigrationFile
 	{
 		// Execute all statements in transaction
 		$this->em->getConnection()->transactional(function () {
@@ -74,9 +76,12 @@ abstract class MigrationFile
 
 	/**
 	 * @param Schema $schema
-	 * @return $this
+	 *
+	 * @return MigrationFile
+	 *
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function addSchema(Schema $schema)
+	public function addSchema(Schema $schema): MigrationFile
 	{
 		$fromSchema = $this->getFromSchema();
 		$platform = $this->em->getConnection()->getDatabasePlatform();
@@ -91,9 +96,10 @@ abstract class MigrationFile
 	/**
 	 * @param $sql
 	 * @param null $params
-	 * @return $this
+	 *
+	 * @return MigrationFile
 	 */
-	public function addSql($sql, $params = null)
+	public function addSql($sql, $params = null): MigrationFile
 	{
 		$this->sqlStatements[] = new SqlStatement($sql, $params);
 
@@ -102,9 +108,10 @@ abstract class MigrationFile
 
 	/**
 	 * @param $class
-	 * @return $this
+	 *
+	 * @return MigrationFile
 	 */
-	public function addClass($class)
+	public function addClass($class): MigrationFile
 	{
 		$this->classes[] = $class;
 
@@ -113,16 +120,20 @@ abstract class MigrationFile
 
 	/**
 	 * @return Schema
+	 *
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function getSchema()
+	public function getSchema(): Schema
 	{
 		return clone $this->getFromSchema();
 	}
 
 	/**
 	 * @return Schema
+	 *
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function getFromSchema()
+	public function getFromSchema(): Schema
 	{
 		if (!$this->fromSchema) {
 			$tool = new SchemaTool($this->em);
@@ -135,7 +146,7 @@ abstract class MigrationFile
 	/**
 	 * @return array
 	 */
-	public function getTableMetadata()
+	public function getTableMetadata(): array
 	{
 		$meta = [];
 
@@ -162,15 +173,17 @@ abstract class MigrationFile
 	/**
 	 * @return SqlStatement[]
 	 */
-	public function getSqlStatements()
+	public function getSqlStatements(): array
 	{
 		return $this->sqlStatements;
 	}
 
 	/**
-	 * @return $this
+	 * @return MigrationFile
+	 *
+	 * @throws \Doctrine\DBAL\DBALException
 	 */
-	private function executeSql()
+	private function executeSql(): MigrationFile
 	{
 		foreach ($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
@@ -183,7 +196,7 @@ abstract class MigrationFile
 	}
 
 	/**
-	 * @return mixed
+	 *
 	 */
 	abstract public function up();
 

@@ -16,10 +16,11 @@ class MigrationDirectory
 
 	/**
 	 * MigrationDirectory constructor.
+	 *
 	 * @param string $directory
 	 * @param int $priority
 	 */
-	public function __construct($directory, $priority)
+	public function __construct(string $directory, ?int $priority = null)
 	{
 		$this->directory = $directory;
 		$this->priority = $priority ?: 0;
@@ -28,7 +29,7 @@ class MigrationDirectory
 	/**
 	 * @return string
 	 */
-	public function getDirectory()
+	public function getDirectory(): string
 	{
 		return $this->directory;
 	}
@@ -36,7 +37,7 @@ class MigrationDirectory
 	/**
 	 * @return int
 	 */
-	public function getPriority()
+	public function getPriority(): int
 	{
 		return $this->priority;
 	}
