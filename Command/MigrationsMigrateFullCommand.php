@@ -27,6 +27,12 @@ class MigrationsMigrateFullCommand extends ContainerAwareCommand
 				InputOption::VALUE_OPTIONAL,
 				'If false or null all directories are used',
 				false)
+			->addOption(
+				'install-directory',
+				null,
+				InputOption::VALUE_OPTIONAL,
+				'will be used for initial installation',
+				'')
 			->setDescription('Starts developer migrations');
 	}
 
@@ -34,6 +40,7 @@ class MigrationsMigrateFullCommand extends ContainerAwareCommand
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
 	 * @return int|null|void
+	 * @throws \Exception
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
@@ -45,6 +52,10 @@ class MigrationsMigrateFullCommand extends ContainerAwareCommand
 		$directory = false;
 		if ($input->getOption('select-directory')) {
 			$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
+		}
+
+		if ($input->getOption('install-directory')) {
+			$directory = $input->getOption('install-directory');
 		}
 
 		$migrationsManager->migrateFull($io, $directory);
