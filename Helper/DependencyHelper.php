@@ -27,6 +27,9 @@ class DependencyHelper
 	 */
 	public function resolveDependencies(array $importFiles): array
 	{
+		// Clear Old Data
+		$this->clear();
+
 		/** @var ImportFile $importFile */
 		foreach ($importFiles as $importFile) {
 			$migrationFile = $importFile->getInstance();
@@ -58,6 +61,16 @@ class DependencyHelper
 		}
 
 		return $this->newOrderedImportFiles;
+	}
+
+	/**
+	 *
+	 */
+	private function clear(): void
+	{
+		$this->dependencyResolutions = [];
+		$this->availableImportFiles = [];
+		$this->newOrderedImportFiles = [];
 	}
 
 }
