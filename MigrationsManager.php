@@ -333,6 +333,10 @@ class MigrationsManager
 	 */
 	private function handleError(\Exception $exception, SymfonyStyle $io)
 	{
+		if (php_sapi_name() !== 'cli') {
+			throw new \Exception($exception);
+		}
+
 		$io->error('Oops, there is an error :(');
 
 		$errorChoices = [
