@@ -28,7 +28,7 @@ class SaelkerMigrationsExtension extends Extension
 		$loader->load('services.yml');
 
 		if (array_key_exists('directories', $config)) {
-			$this->addDirectories($config['directories'], $container);
+			$this->addDirectories($config['directories'], $container, $config['scope_directories']);
 		}
 
 		// Add configs to directory helper
@@ -41,13 +41,16 @@ class SaelkerMigrationsExtension extends Extension
 	/**
 	 * @param $directories
 	 * @param ContainerBuilder $container
+	 * @param bool $scopeDirectories
 	 */
-	private function addDirectories($directories, ContainerBuilder $container)
+	private function addDirectories($directories, ContainerBuilder $container, bool $scopeDirectories)
 	{
 		$manager = $container->getDefinition(MigrationsManager::class);
 
 		foreach ($directories as $directory) {
 			$manager->addMethodCall('addDirectory', [$directory]);
 		}
+
+		$manager->addMethodCall('setScopeDirectories', [$scopeDirectories]);
 	}
 }

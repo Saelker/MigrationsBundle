@@ -252,10 +252,12 @@ class MigrationsManager
 			}
 
 			if ($this->scopeDirectories) {
-				array_merge($files, $this->sortAndFilterFiles($tempFiles));
+				$files = array_merge($files, $this->sortAndFilterFiles($tempFiles));
 			} else {
-				array_merge($files, $tempFiles);
+				$files = array_merge($files, $tempFiles);
 			}
+
+			$tempFiles = [];
 		}
 
 		if (!$this->scopeDirectories) {
