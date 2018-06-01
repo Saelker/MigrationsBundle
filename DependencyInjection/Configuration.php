@@ -10,6 +10,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
  */
+
 class Configuration implements ConfigurationInterface
 {
 	/**
@@ -29,6 +30,7 @@ class Configuration implements ConfigurationInterface
 				->scalarNode('directory_separator')->defaultValue('/')->end()
 				->booleanNode('use_camel_case')->defaultFalse()->end()
 				->booleanNode('ignore_errors')->defaultFalse()->end()
+				->booleanNode('scope_directories')->defaultFalse()->end()
 			->end();
 
 		return $treeBuilder;

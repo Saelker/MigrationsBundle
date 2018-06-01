@@ -32,7 +32,7 @@ class MigrationsMigrateCommand extends ContainerAwareCommand
 				null,
 				InputOption::VALUE_OPTIONAL,
 				'will be used for initial installation',
-				'')
+				null)
 			->setDescription('Starts migrations');
 	}
 

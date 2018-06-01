@@ -41,6 +41,11 @@ class MigrationsManager
 	private $directoryHelper;
 
 	/**
+	 * @var bool
+	 */
+	private $scopeDirectories;
+
+	/**
 	 * MigrationsManager constructor.
 	 *
 	 * @param EntityManagerInterface $em
@@ -75,6 +80,14 @@ class MigrationsManager
 		});
 
 		return $this;
+	}
+
+	/**
+	 * @param bool $scopeDirectories
+	 */
+	public function setScopeDirectories(bool $scopeDirectories): void
+	{
+		$this->scopeDirectories = $scopeDirectories;
 	}
 
 	/**
@@ -157,7 +170,7 @@ class MigrationsManager
 		$files = $this->fetchFiles($io, $directory, function (string $directory) use ($repo): \Closure {
 
 			$doneMigrationIdentifiers = [];
-			foreach($repo->getAllMigrationIdentifiers($this->directoryHelper->getCleanedPath($directory)) as $migration) {
+			foreach ($repo->getAllMigrationIdentifiers($this->directoryHelper->getCleanedPath($directory)) as $migration) {
 				$doneMigrationIdentifiers[] = $migration['identifier'];
 			}
 
@@ -210,15 +223,14 @@ class MigrationsManager
 	 */
 	private function fetchFiles(SymfonyStyle $io, ?string $directory, \Closure $filterFn): array
 	{
-		/** @var MigrationRepository $repo */
-		$repo = $this->em->getRepository(Migration::class);
-
 		/** @var ImportFile[] $files */
 		$files = [];
 
 		$directories = $directory ? [$directory] : $this->getDirectories();
 		$io->listing($directories);
 
+		/** @var ImportFile[] $files */
+		$tempFiles = [];
 		foreach ($directories as $directory) {
 			// Check if directory exists
 			if (is_dir($directory)) {
@@ -232,14 +244,38 @@ class MigrationsManager
 				$finder->filter($filterFn($directory));
 
 				foreach ($finder as $file) {
-					$files[] = new ImportFile($file, $this->em, $this->container);
+					$tempFiles[] = new ImportFile($file, $this->em, $this->container);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
 				return [];
 			}
+
+			if ($this->scopeDirectories) {
+				array_merge($files, $this->sortAndFilterFiles($tempFiles));
+			} else {
+				array_merge($files, $tempFiles);
+			}
 		}
 
+		if (!$this->scopeDirectories) {
+			$files = array_unique($files);
+
+			usort($files, function (ImportFile $x, ImportFile $y) {
+				return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
+			});
+		}
+
+		return $files;
+	}
+
+	/**
+	 * @param array|null $files
+	 *
+	 * @return array|null
+	 */
+	private function sortAndFilterFiles(?array $files): ?array
+	{
 		$files = array_unique($files);
 
 		usort($files, function (ImportFile $x, ImportFile $y) {
@@ -290,7 +326,7 @@ class MigrationsManager
 				->setCreatedAt(new \DateTime())
 				->setSequence($sequence);
 
-			if($note = $file->getNote()) {
+			if ($note = $file->getNote()) {
 				$notes[$file->getInstance()->getClassName()] = $note;
 			}
 
@@ -302,13 +338,12 @@ class MigrationsManager
 		$io->success('Finished, ' . count($files) . " files imported.");
 
 		// Show Notes
-		if(!empty($notes)) {
+		if (!empty($notes)) {
 			$io->section("Migration Notes");
 			$noteNumber = 1;
 
-			foreach($notes as $identifier => $note)
-			{
-				$io->section($noteNumber++ . ": ". $identifier);
+			foreach ($notes as $identifier => $note) {
+				$io->section($noteNumber++ . ": " . $identifier);
 				$io->note($note);
 			}
 		}
