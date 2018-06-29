@@ -46,6 +46,13 @@ class MigrationsManager
 	private $scopeDirectories;
 
 	/**
+	 * To check if symfony is loaded in migration mode
+	 *
+	 * @var bool
+	 */
+	private $migration = false;
+
+	/**
 	 * MigrationsManager constructor.
 	 *
 	 * @param EntityManagerInterface $em
@@ -117,6 +124,8 @@ class MigrationsManager
 	 */
 	public function migrate(SymfonyStyle $io, $directory = null)
 	{
+		$this->setMigration(true);
+
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
 
@@ -160,6 +169,8 @@ class MigrationsManager
 	 */
 	public function migrateFull(SymfonyStyle $io, $directory = null)
 	{
+		$this->setMigration(true);
+
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);
 
@@ -397,5 +408,24 @@ class MigrationsManager
 			}
 
 		} while ($selectedChoice != 'Ignore Error');
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isMigration(): bool
+	{
+		return $this->migration;
+	}
+
+	/**
+	 * @param bool $migration
+	 *
+	 * @return MigrationsManager
+	 */
+	public function setMigration(bool $migration): MigrationsManager
+	{
+		$this->migration = $migration;
+		return $this;
 	}
 }
