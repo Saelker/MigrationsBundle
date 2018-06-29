@@ -50,7 +50,7 @@ class MigrationsManager
 	 *
 	 * @var bool
 	 */
-	private $migration = false;
+	public static $migration = false;
 
 	/**
 	 * MigrationsManager constructor.
@@ -411,21 +411,13 @@ class MigrationsManager
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isMigration(): bool
-	{
-		return $this->migration;
-	}
-
-	/**
 	 * @param bool $migration
 	 *
 	 * @return MigrationsManager
 	 */
 	public function setMigration(bool $migration): MigrationsManager
 	{
-		$this->migration = $migration;
+		self::$migration = $migration;
 		return $this;
 	}
 }
