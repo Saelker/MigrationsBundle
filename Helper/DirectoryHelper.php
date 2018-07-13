@@ -32,7 +32,7 @@ class DirectoryHelper
 	 * @param $env
 	 * @param $useCamelCase
 	 */
-	public function __construct(string $cleanDepth, string $directorySeparator, string $env, bool $useCamelCase)
+	public function __construct(?string $cleanDepth, ?string $directorySeparator, ?string $env, ?bool $useCamelCase)
 	{
 		$this->cleanDepth = $cleanDepth;
 		$this->directorySeparator = $directorySeparator;
