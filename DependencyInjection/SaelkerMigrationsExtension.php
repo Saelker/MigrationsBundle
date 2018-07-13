@@ -35,6 +35,7 @@ class SaelkerMigrationsExtension extends Extension
 		$directoryHelper = $container->getDefinition(DirectoryHelper::class);
 		$directoryHelper->addArgument($config['clean_depth']);
 		$directoryHelper->addArgument($config['directory_separator']);
+		$directoryHelper->addArgument($config['env']);
 		$directoryHelper->addArgument($config['use_camel_case']);
 	}
 

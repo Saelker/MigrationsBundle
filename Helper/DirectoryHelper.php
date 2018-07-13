@@ -20,17 +20,28 @@ class DirectoryHelper
 	private $useCamelCase;
 
 	/**
+	 * @var string
+	 */
+	private $env;
+
+	/**
 	 * DirectoryHelper constructor.
 	 *
 	 * @param $cleanDepth
 	 * @param $directorySeparator
+	 * @param $env
 	 * @param $useCamelCase
 	 */
-	public function __construct($cleanDepth, $directorySeparator, $useCamelCase)
+	public function __construct(string $cleanDepth, string $directorySeparator, string $env, bool $useCamelCase)
 	{
 		$this->cleanDepth = $cleanDepth;
 		$this->directorySeparator = $directorySeparator;
 		$this->useCamelCase = $useCamelCase;
+		$this->env = $env;
+
+		if ($env == 'win' && !$directorySeparator) {
+			$this->directorySeparator = '\\';
+		}
 	}
 
 	/**
