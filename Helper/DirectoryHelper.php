@@ -39,8 +39,8 @@ class DirectoryHelper
 		$this->useCamelCase = $useCamelCase;
 		$this->env = $env;
 
-		if ($env == 'win' && !$directorySeparator) {
-			$this->directorySeparator = '\\';
+		if (!$directorySeparator) {
+			$this->directorySeparator = $env == 'win' ? '\\' : '/';
 		}
 	}
 
