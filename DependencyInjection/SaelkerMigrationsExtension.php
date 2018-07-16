@@ -18,6 +18,8 @@ class SaelkerMigrationsExtension extends Extension
 {
 	/**
 	 * {@inheritdoc}
+	 *
+	 * @throws \Exception
 	 */
 	public function load(array $configs, ContainerBuilder $container)
 	{
@@ -34,8 +36,6 @@ class SaelkerMigrationsExtension extends Extension
 		// Add configs to directory helper
 		$directoryHelper = $container->getDefinition(DirectoryHelper::class);
 		$directoryHelper->addArgument($config['clean_depth']);
-		$directoryHelper->addArgument($config['directory_separator']);
-		$directoryHelper->addArgument($config['env']);
 		$directoryHelper->addArgument($config['use_camel_case']);
 	}
 

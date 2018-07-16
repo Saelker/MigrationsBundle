@@ -27,8 +27,6 @@ class Configuration implements ConfigurationInterface
 					->prototype('scalar')->end()
 				->end()
 				->scalarNode('clean_depth')->defaultNull()->end()
-				->scalarNode('directory_separator')->defaultNull()->end()
-				->scalarNode('env')->defaultValue('unix')->end()
 				->booleanNode('use_camel_case')->defaultFalse()->end()
 				->booleanNode('ignore_errors')->defaultFalse()->end()
 				->booleanNode('scope_directories')->defaultFalse()->end()

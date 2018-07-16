@@ -5,43 +5,30 @@ namespace Saelker\MigrationsBundle\Helper;
 class DirectoryHelper
 {
 	/**
-	 * @var
+	 * @var string|null
 	 */
 	private $cleanDepth;
 
 	/**
-	 * @var
-	 */
-	private $directorySeparator;
-
-	/**
-	 * @var
-	 */
-	private $useCamelCase;
-
-	/**
 	 * @var string
 	 */
-	private $env;
+	private $directorySeparator = '/';
+
+	/**
+	 * @var bool|null
+	 */
+	private $useCamelCase;
 
 	/**
 	 * DirectoryHelper constructor.
 	 *
 	 * @param $cleanDepth
-	 * @param $directorySeparator
-	 * @param $env
 	 * @param $useCamelCase
 	 */
-	public function __construct(?string $cleanDepth, ?string $directorySeparator, ?string $env, ?bool $useCamelCase)
+	public function __construct(?string $cleanDepth, ?bool $useCamelCase)
 	{
 		$this->cleanDepth = $cleanDepth;
-		$this->directorySeparator = $directorySeparator;
 		$this->useCamelCase = $useCamelCase;
-		$this->env = $env;
-
-		if (!$directorySeparator) {
-			$this->directorySeparator = $env == 'win' ? '\\' : '/';
-		}
 	}
 
 	/**
@@ -53,6 +40,9 @@ class DirectoryHelper
 		if (!$this->cleanDepth) {
 			return $directory;
 		}
+
+		// replace all black slashes with a normal slash
+		$directory = str_replace('\\', '/', $directory);
 
 		$directories = explode($this->directorySeparator, $directory);
 		$directoriesCount = count($directories);
