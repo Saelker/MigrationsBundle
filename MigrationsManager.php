@@ -261,6 +261,7 @@ class MigrationsManager
 
 		foreach ($files as $rollbackImportFile) {
 			$rollbackImportFile->rollback();
+			$io->writeln("\r<info> - Rolback file: " . $rollbackImportFile->getFile()->getBasename() . "</info>");
 		}
 
 		// Delete Migrations entries
