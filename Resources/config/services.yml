@@ -11,3 +11,8 @@ services:
     Saelker\MigrationsBundle\Command\:
         resource: '../../Command'
         tags: ['console.command']
+
+    #   Entity Repositories as Services for DI
+    Saelker\MigrationsBundle\Repository\:
+        resource: '../../Repository'
+        tags: ['doctrine.repository_service']

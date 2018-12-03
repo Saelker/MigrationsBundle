@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Helper\DependencyHelper;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
+use Saelker\MigrationsBundle\Helper\RollbackHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
@@ -53,25 +54,44 @@ class MigrationsManager
 	public static $migration = false;
 
 	/**
+	 * @var RollbackHelper
+	 */
+	private $rollbackHelper;
+
+	/**
+	 * @var MigrationRepository
+	 */
+	private $migrationRepository;
+
+	/**
 	 * MigrationsManager constructor.
 	 *
 	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
 	 * @param DependencyHelper $dependencyHelper
 	 * @param DirectoryHelper $directoryHelper
+	 * @param RollbackHelper $rollbackHelper
+	 * @param MigrationRepository $migrationRepository
 	 */
-	public function __construct(EntityManagerInterface $em, ContainerInterface $container,
-								DependencyHelper $dependencyHelper, DirectoryHelper $directoryHelper)
+	public function __construct(EntityManagerInterface $em,
+								ContainerInterface $container,
+								DependencyHelper $dependencyHelper,
+								DirectoryHelper $directoryHelper,
+								RollbackHelper $rollbackHelper,
+								MigrationRepository $migrationRepository)
 	{
 		$this->em = $em;
 		$this->container = $container;
 		$this->dependencyHelper = $dependencyHelper;
 		$this->directoryHelper = $directoryHelper;
+		$this->rollbackHelper = $rollbackHelper;
+		$this->migrationRepository = $migrationRepository;
 	}
 
 	/**
 	 * @param \string $directory
 	 * @param integer $priority
+	 *
 	 * @return $this
 	 */
 	public function addDirectory($directory, $priority = null)
@@ -99,6 +119,7 @@ class MigrationsManager
 
 	/**
 	 * @deprecated use getMigrationDirectories()
+	 *
 	 * @return \string[]
 	 */
 	public function getDirectories()
@@ -119,8 +140,11 @@ class MigrationsManager
 	/**
 	 * @param SymfonyStyle $io
 	 * @param string $directory
+	 *
 	 * @return $this
+	 *
 	 * @throws \Exception
+	 * @throws \Throwable
 	 */
 	public function migrate(SymfonyStyle $io, $directory = null)
 	{
@@ -164,8 +188,11 @@ class MigrationsManager
 	/**
 	 * @param SymfonyStyle $io
 	 * @param string $directory
+	 *
 	 * @return $this
+	 *
 	 * @throws \Exception
+	 * @throws \Throwable
 	 */
 	public function migrateFull(SymfonyStyle $io, $directory = null)
 	{
@@ -208,7 +235,10 @@ class MigrationsManager
 
 	/**
 	 * @param SymfonyStyle $io
+	 *
 	 * @return $this
+	 *
+	 * @throws \Exception
 	 */
 	public function rollback(SymfonyStyle $io)
 	{
@@ -218,10 +248,25 @@ class MigrationsManager
 		$sequence = $repo->getLatestSequence();
 		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
 
-		/** @var ImportFile[] $files */
-		$files = [];
+		$sure = $io->ask('Are you sure you want to rollback?', true);
 
-		//TODO Rolback
+		if (!$sure) {
+			$io->warning('Rollback skipped');
+			return $this;
+		}
+
+		// Get files for Sequence
+		/** @var ImportFile[] $files */
+		$files = $this->rollbackHelper->getSequenceImportFiles($sequence, $this->directories);
+
+		foreach ($files as $rollbackImportFile) {
+			$rollbackImportFile->rollback();
+		}
+
+		// Delete Migrations entries
+		$this->migrationRepository->deleteFromSequence($sequence);
+
+		$io->success('Successful rollback from ' . $sequence . ' to ' . ($sequence - 1));
 
 		return $this;
 	}
@@ -230,6 +275,7 @@ class MigrationsManager
 	 * @param SymfonyStyle $io
 	 * @param null|string $directory
 	 * @param \Closure $filterFn
+	 *
 	 * @return array
 	 */
 	private function fetchFiles(SymfonyStyle $io, ?string $directory, \Closure $filterFn): array
@@ -303,6 +349,8 @@ class MigrationsManager
 	 * @param array $files
 	 *
 	 * @throws \Exception
+	 *
+	 * @throws \Throwable
 	 */
 	private function migrateFiles(SymfonyStyle $io, array $files): void
 	{
@@ -365,6 +413,7 @@ class MigrationsManager
 
 	/**
 	 * @param $basename
+	 *
 	 * @return string
 	 */
 	private function getFileIdentifier($basename)
@@ -377,6 +426,7 @@ class MigrationsManager
 	/**
 	 * @param \Exception $exception
 	 * @param SymfonyStyle $io
+	 *
 	 * @throws \Exception
 	 */
 	private function handleError(\Exception $exception, SymfonyStyle $io)
@@ -402,6 +452,7 @@ class MigrationsManager
 					$io->newLine(1);
 					$io->error($exception->getMessage());
 					break;
+
 				case 'Exit':
 					$io->warning('Exit migration');
 					exit;

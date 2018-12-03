@@ -73,6 +73,8 @@ abstract class MigrationFile
 	 * @return MigrationFile
 	 *
 	 * @throws \Exception
+	 *
+	 * @throws \Throwable
 	 */
 	public function executeUp(): MigrationFile
 	{
@@ -97,6 +99,7 @@ abstract class MigrationFile
 	 * @return MigrationFile
 	 *
 	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\DBAL\DBALException
 	 */
 	public function addSchema(Schema $schema): MigrationFile
 	{
@@ -280,6 +283,14 @@ abstract class MigrationFile
 	 *
 	 */
 	abstract public function up();
+
+	/**
+	 * Will execute the down function for given migrations
+	 */
+	public function down(): void
+	{
+
+	}
 
 	/**
 	 *

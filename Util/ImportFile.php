@@ -6,6 +6,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * Class ImportFile
+ *
+ * @package Saelker\MigrationsBundle\Util
+ */
 class ImportFile
 {
 	/**
@@ -53,11 +58,24 @@ class ImportFile
 	 * @return ImportFile
 	 *
 	 * @throws \Exception
+	 *
+	 * @throws \Throwable
 	 */
 	public function migrate(): ImportFile
 	{
 		$instance = $this->getInstance();
 		$instance->executeUp();
+
+		return $this;
+	}
+
+	/**
+	 * @return ImportFile
+	 */
+	public function rollback(): ImportFile
+	{
+		$instance = $this->getInstance();
+		$instance->down();
 
 		return $this;
 	}
