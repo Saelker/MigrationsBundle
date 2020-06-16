@@ -6,7 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Util\ImportFile;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -20,9 +20,9 @@ class MigrationRepository extends ServiceEntityRepository
 	/**
 	 * MigrationRepository constructor.
 	 *
-	 * @param RegistryInterface $registry
+	 * @param ManagerRegistry $registry
 	 */
-	public function __construct(RegistryInterface $registry)
+	public function __construct(ManagerRegistry $registry)
 	{
 		parent::__construct($registry, Migration::class);
 	}
