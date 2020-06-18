@@ -10,7 +10,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/configuration.html}
  */
-
 class Configuration implements ConfigurationInterface
 {
 	/**
@@ -23,13 +22,13 @@ class Configuration implements ConfigurationInterface
 
 		$rootNode
 			->children()
-				->arrayNode('directories')
-					->prototype('scalar')->end()
-				->end()
-				->scalarNode('clean_depth')->defaultNull()->end()
-				->booleanNode('use_camel_case')->defaultFalse()->end()
-				->booleanNode('ignore_errors')->defaultFalse()->end()
-				->booleanNode('scope_directories')->defaultFalse()->end()
+			->arrayNode('directories')
+			->prototype('scalar')->end()
+			->end()
+			->scalarNode('clean_depth')->defaultNull()->end()
+			->booleanNode('use_camel_case')->defaultFalse()->end()
+			->booleanNode('ignore_errors')->defaultFalse()->end()
+			->booleanNode('scope_directories')->defaultFalse()->end()
 			->end();
 
 		return $treeBuilder;

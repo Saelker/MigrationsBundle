@@ -52,6 +52,7 @@ class Migration
 
 	/**
 	 * @param string $identifier
+	 *
 	 * @return Migration
 	 */
 	public function setIdentifier($identifier)
@@ -71,6 +72,7 @@ class Migration
 
 	/**
 	 * @param string $directory
+	 *
 	 * @return Migration
 	 */
 	public function setDirectory($directory)
@@ -90,6 +92,7 @@ class Migration
 
 	/**
 	 * @param \DateTime $createdAt
+	 *
 	 * @return Migration
 	 */
 	public function setCreatedAt($createdAt)
@@ -109,11 +112,13 @@ class Migration
 
 	/**
 	 * @param int $sequence
+	 *
 	 * @return Migration
 	 */
 	public function setSequence($sequence)
 	{
 		$this->sequence = $sequence;
+
 		return $this;
 	}
 }

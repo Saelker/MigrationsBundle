@@ -4,9 +4,9 @@ namespace Saelker\MigrationsBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Util\ImportFile;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -28,15 +28,6 @@ class MigrationRepository extends ServiceEntityRepository
 	}
 
 	/**
-	 * @return QueryBuilder
-	 */
-	public function getQueryBuilder(): QueryBuilder
-	{
-		return $this
-			->createQueryBuilder('m');
-	}
-
-	/**
 	 * @param $directory
 	 *
 	 * @return Migration
@@ -50,6 +41,29 @@ class MigrationRepository extends ServiceEntityRepository
 			->setMaxResults(1)
 			->getQuery()
 			->getOneOrNullResult();
+	}
+
+	/**
+	 * @param $directory
+	 *
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	private function getIdentifierQueryBuilder($directory)
+	{
+		return $this
+			->getQueryBuilder()
+			->andWhere('m.directory = :directory')
+			->orderBy('m.identifier', 'DESC')
+			->setParameter('directory', $directory);
+	}
+
+	/**
+	 * @return QueryBuilder
+	 */
+	public function getQueryBuilder(): QueryBuilder
+	{
+		return $this
+			->createQueryBuilder('m');
 	}
 
 	/**
@@ -115,20 +129,6 @@ class MigrationRepository extends ServiceEntityRepository
 		}
 
 		return $currentIdentifier . sprintf('%03d', $newNumber);
-	}
-
-	/**
-	 * @param $directory
-	 *
-	 * @return \Doctrine\ORM\QueryBuilder
-	 */
-	private function getIdentifierQueryBuilder($directory)
-	{
-		return $this
-			->getQueryBuilder()
-			->andWhere('m.directory = :directory')
-			->orderBy('m.identifier', 'DESC')
-			->setParameter('directory', $directory);
 	}
 
 	/**

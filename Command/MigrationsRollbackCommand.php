@@ -3,13 +3,30 @@
 namespace Saelker\MigrationsBundle\Command;
 
 use Saelker\MigrationsBundle\MigrationsManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class MigrationsRollbackCommand extends ContainerAwareCommand
+class MigrationsRollbackCommand extends Command
 {
+	/**
+	 * @var MigrationsManager
+	 */
+	private $migrationsManager;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param MigrationsManager $migrationsManager
+	 */
+	public function __construct(MigrationsManager $migrationsManager)
+	{
+		parent::__construct();
+		$this->migrationsManager = $migrationsManager;
+	}
+
+
 	/**
 	 * @inheritdoc
 	 */
@@ -25,12 +42,14 @@ class MigrationsRollbackCommand extends ContainerAwareCommand
 	/**
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
+	 *
 	 * @return int|null|void
+	 *
+	 * @throws \Exception
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
 		$io = new SymfonyStyle($input, $output);
-		$migrationsManager->rollback($io);
+		$this->migrationsManager->rollback($io);
 	}
 }

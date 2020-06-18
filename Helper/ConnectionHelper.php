@@ -20,6 +20,7 @@ class ConnectionHelper
 
 	/**
 	 * ConnectionHelper constructor.
+	 *
 	 * @param EntityManagerInterface $entityManager
 	 */
 	public function __construct(EntityManagerInterface $entityManager)
@@ -54,6 +55,7 @@ class ConnectionHelper
 	/**
 	 * @param string $table
 	 * @param string $column
+	 *
 	 * @return bool
 	 */
 	public function hasColumn(string $table, string $column): bool

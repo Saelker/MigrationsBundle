@@ -33,6 +33,7 @@ class DirectoryHelper
 
 	/**
 	 * @param string $directory
+	 *
 	 * @return string
 	 */
 	public function getCleanedPath(string $directory): string
@@ -62,6 +63,7 @@ class DirectoryHelper
 
 	/**
 	 * @param array $directories
+	 *
 	 * @return array
 	 */
 	public function getSourceDirectories(array $directories): array

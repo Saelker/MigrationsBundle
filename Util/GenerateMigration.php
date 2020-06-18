@@ -30,6 +30,7 @@ class V_<identifier>_<description> extends MigrationFile
 	 * @param string $description
 	 * @param string $directory
 	 * @param string $note
+	 *
 	 * @return string
 	 */
 	public static function generate(string $namespace, string $identifier, string $description, string $directory, string $note): string
@@ -47,7 +48,7 @@ class V_<identifier>_<description> extends MigrationFile
 			$namespace,
 			$identifier,
 			$description,
-			str_replace("\"", "'", $note)
+			str_replace("\"", "'", $note),
 		];
 
 		$code = str_replace($placeHolders, $replacements, self::$template);
@@ -61,7 +62,23 @@ class V_<identifier>_<description> extends MigrationFile
 	}
 
 	/**
+	 * @param string $string
+	 *
+	 * @return string
+	 */
+	private static function toCamelCase(string $string): string
+	{
+		$string = str_replace('-', ' ', $string);
+		$string = str_replace('_', ' ', $string);
+		$string = ucwords(strtolower($string));
+		$string = str_replace(' ', '', $string);
+
+		return $string;
+	}
+
+	/**
 	 * @param string $directory
+	 *
 	 * @return null|string
 	 */
 	public static function getNamespaceFromDirectory(string $directory): ?string
@@ -75,19 +92,5 @@ class V_<identifier>_<description> extends MigrationFile
 		}
 
 		return $key ? implode('\\', $namespace) : null;
-	}
-
-	/**
-	 * @param string $string
-	 * @return string
-	 */
-	private static function toCamelCase(string $string): string
-	{
-		$string = str_replace('-', ' ', $string);
-		$string = str_replace('_', ' ', $string);
-		$string = ucwords(strtolower($string));
-		$string = str_replace(' ', '', $string);
-
-		return $string;
 	}
 }

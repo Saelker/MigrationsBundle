@@ -14,49 +14,42 @@ abstract class MigrationFile
 	 * @var EntityManagerInterface
 	 */
 	protected $em;
-
+	/**
+	 * @var ContainerInterface
+	 */
+	protected $container;
+	/**
+	 * @var ConnectionHelper
+	 */
+	protected $connectionHelper;
+	/**
+	 * @var string|null
+	 */
+	protected $dependency;
+	/**
+	 * @var string|null
+	 */
+	protected $dependencyResolution;
+	/**
+	 * @var int
+	 */
+	protected $migrationOrder = 0;
 	/**
 	 * @var SqlStatement[]
 	 */
 	private $sqlStatements = [];
-
 	/**
 	 * @var string[][]
 	 */
 	private $classes = [];
-
 	/**
 	 * @var Schema
 	 */
 	private $fromSchema;
 
 	/**
-	 * @var ContainerInterface
-	 */
-	protected $container;
-
-	/**
-	 * @var ConnectionHelper
-	 */
-	protected $connectionHelper;
-
-	/**
-	 * @var string|null
-	 */
-	protected $dependency;
-
-	/**
-	 * @var string|null
-	 */
-	protected $dependencyResolution;
-
-	/**
-	 * @var int
-	 */
-	protected $migrationOrder = 0;
-
-	/**
 	 * MigrationFile constructor.
+	 *
 	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
 	 */
@@ -67,6 +60,13 @@ abstract class MigrationFile
 		$this->connectionHelper = $container->get(ConnectionHelper::class);
 
 		$this->init();
+	}
+
+	/**
+	 *
+	 */
+	public function init(): void
+	{
 	}
 
 	/**
@@ -94,6 +94,50 @@ abstract class MigrationFile
 	}
 
 	/**
+	 *
+	 */
+	public function preUp()
+	{
+	}
+
+	/**
+	 *
+	 */
+	abstract public function up();
+
+	/**
+	 * @return MigrationFile
+	 *
+	 * @throws \Doctrine\DBAL\DBALException
+	 */
+	private function executeSql(): MigrationFile
+	{
+		foreach ($this->getSqlStatements() as $key => $sql) {
+			$stmt = $this->em->getConnection()->prepare($sql->getSql());
+			$stmt->execute($sql->getParams());
+
+			unset($this->sqlStatements[$key]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @return SqlStatement[]
+	 */
+	public function getSqlStatements(): array
+	{
+		return $this->sqlStatements;
+	}
+
+	/**
+	 *
+	 */
+	public function postUp()
+	{
+	}
+
+	/**
 	 * @param Schema $schema
 	 *
 	 * @return MigrationFile
@@ -111,41 +155,6 @@ abstract class MigrationFile
 		}
 
 		return $this;
-	}
-
-	/**
-	 * @param $sql
-	 * @param null $params
-	 *
-	 * @return MigrationFile
-	 */
-	public function addSql($sql, $params = null): MigrationFile
-	{
-		$this->sqlStatements[] = new SqlStatement($sql, $params);
-
-		return $this;
-	}
-
-	/**
-	 * @param $class
-	 *
-	 * @return MigrationFile
-	 */
-	public function addClass($class): MigrationFile
-	{
-		$this->classes[] = $class;
-
-		return $this;
-	}
-
-	/**
-	 * @return Schema
-	 *
-	 * @throws \Doctrine\ORM\ORMException
-	 */
-	public function getSchema(): Schema
-	{
-		return clone $this->getFromSchema();
 	}
 
 	/**
@@ -191,28 +200,38 @@ abstract class MigrationFile
 	}
 
 	/**
-	 * @return SqlStatement[]
+	 * @param $sql
+	 * @param null $params
+	 *
+	 * @return MigrationFile
 	 */
-	public function getSqlStatements(): array
+	public function addSql($sql, $params = null): MigrationFile
 	{
-		return $this->sqlStatements;
+		$this->sqlStatements[] = new SqlStatement($sql, $params);
+
+		return $this;
 	}
 
 	/**
-	 * @return MigrationFile
+	 * @param $class
 	 *
-	 * @throws \Doctrine\DBAL\DBALException
+	 * @return MigrationFile
 	 */
-	private function executeSql(): MigrationFile
+	public function addClass($class): MigrationFile
 	{
-		foreach ($this->getSqlStatements() as $key => $sql) {
-			$stmt = $this->em->getConnection()->prepare($sql->getSql());
-			$stmt->execute($sql->getParams());
-
-			unset($this->sqlStatements[$key]);
-		}
+		$this->classes[] = $class;
 
 		return $this;
+	}
+
+	/**
+	 * @return Schema
+	 *
+	 * @throws \Doctrine\ORM\ORMException
+	 */
+	public function getSchema(): Schema
+	{
+		return clone $this->getFromSchema();
 	}
 
 	/**
@@ -231,6 +250,7 @@ abstract class MigrationFile
 	public function setDependency(?string $dependency): MigrationFile
 	{
 		$this->dependency = $dependency;
+
 		return $this;
 	}
 
@@ -250,6 +270,7 @@ abstract class MigrationFile
 	public function setDependencyResolution(?string $dependencyResolution): MigrationFile
 	{
 		$this->dependencyResolution = $dependencyResolution;
+
 		return $this;
 	}
 
@@ -263,11 +284,13 @@ abstract class MigrationFile
 
 	/**
 	 * @param int $migrationOrder
+	 *
 	 * @return MigrationFile
 	 */
 	public function setMigrationOrder(int $migrationOrder): MigrationFile
 	{
 		$this->migrationOrder = $migrationOrder;
+
 		return $this;
 	}
 
@@ -280,36 +303,10 @@ abstract class MigrationFile
 	}
 
 	/**
-	 *
-	 */
-	abstract public function up();
-
-	/**
 	 * Will execute the down function for given migrations
 	 */
 	public function down(): void
 	{
 
-	}
-
-	/**
-	 *
-	 */
-	public function preUp()
-	{
-	}
-
-	/**
-	 *
-	 */
-	public function postUp()
-	{
-	}
-
-	/**
-	 *
-	 */
-	public function init(): void
-	{
 	}
 }

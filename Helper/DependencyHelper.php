@@ -23,6 +23,7 @@ class DependencyHelper
 
 	/**
 	 * @param array $importFiles
+	 *
 	 * @return array
 	 */
 	public function resolveDependencies(array $importFiles): array

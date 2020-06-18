@@ -17,42 +17,35 @@ use Symfony\Component\Finder\Finder;
 class MigrationsManager
 {
 	/**
-	 * @var EntityManagerInterface
-	 */
-	private $em;
-
-	/**
-	 * @var MigrationDirectory[]
-	 */
-	private $directories;
-
-	/**
-	 * @var ContainerInterface
-	 */
-	private $container;
-
-	/**
-	 * @var DependencyHelper
-	 */
-	private $dependencyHelper;
-
-	/**
-	 * @var DirectoryHelper
-	 */
-	private $directoryHelper;
-
-	/**
-	 * @var bool
-	 */
-	private $scopeDirectories;
-
-	/**
 	 * To check if symfony is loaded in migration mode
 	 *
 	 * @var bool
 	 */
 	public static $migration = false;
-
+	/**
+	 * @var EntityManagerInterface
+	 */
+	private $em;
+	/**
+	 * @var MigrationDirectory[]
+	 */
+	private $directories;
+	/**
+	 * @var ContainerInterface
+	 */
+	private $container;
+	/**
+	 * @var DependencyHelper
+	 */
+	private $dependencyHelper;
+	/**
+	 * @var DirectoryHelper
+	 */
+	private $directoryHelper;
+	/**
+	 * @var bool
+	 */
+	private $scopeDirectories;
 	/**
 	 * @var RollbackHelper
 	 */
@@ -118,18 +111,6 @@ class MigrationsManager
 	}
 
 	/**
-	 * @deprecated use getMigrationDirectories()
-	 *
-	 * @return \string[]
-	 */
-	public function getDirectories()
-	{
-		return array_map(function (MigrationDirectory $migrationDirectory) {
-			return $migrationDirectory->getDirectory();
-		}, $this->directories);
-	}
-
-	/**
 	 * @return MigrationDirectory[]
 	 */
 	public function getMigrationDirectories()
@@ -186,88 +167,13 @@ class MigrationsManager
 	}
 
 	/**
-	 * @param SymfonyStyle $io
-	 * @param string $directory
+	 * @param bool $migration
 	 *
-	 * @return $this
-	 *
-	 * @throws \Exception
-	 * @throws \Throwable
+	 * @return MigrationsManager
 	 */
-	public function migrateFull(SymfonyStyle $io, $directory = null)
+	public function setMigration(bool $migration): MigrationsManager
 	{
-		$this->setMigration(true);
-
-		/** @var MigrationRepository $repo */
-		$repo = $this->em->getRepository(Migration::class);
-
-		$io->warning('!!! FULL-MIGRATION !!!');
-		$io->title('Starting migrations, directories:');
-
-		/** @var ImportFile[] $files */
-		$files = $this->fetchFiles($io, $directory, function (string $directory) use ($repo): \Closure {
-
-			$doneMigrationIdentifiers = [];
-			foreach ($repo->getAllMigrationIdentifiers($this->directoryHelper->getCleanedPath($directory)) as $migration) {
-				$doneMigrationIdentifiers[] = $migration['identifier'];
-			}
-
-			return function (\SplFileInfo $file) use ($doneMigrationIdentifiers) {
-				if (
-					$this->getFileIdentifier($file->getBasename())
-					&& !in_array($this->getFileIdentifier($file->getBasename()), $doneMigrationIdentifiers)
-				) {
-					return true;
-				}
-
-				return false;
-			};
-		});
-
-		if ($files) {
-			$this->migrateFiles($io, $files);
-		} else {
-			$io->success('Everything is up to date.');
-		}
-
-		return $this;
-	}
-
-	/**
-	 * @param SymfonyStyle $io
-	 *
-	 * @return $this
-	 *
-	 * @throws \Exception
-	 */
-	public function rollback(SymfonyStyle $io)
-	{
-		/** @var MigrationRepository $repo */
-		$repo = $this->em->getRepository(Migration::class);
-
-		$sequence = $repo->getLatestSequence();
-		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
-
-		$sure = $io->ask('Are you sure you want to rollback?', true);
-
-		if (!$sure) {
-			$io->warning('Rollback skipped');
-			return $this;
-		}
-
-		// Get files for Sequence
-		/** @var ImportFile[] $files */
-		$files = $this->rollbackHelper->getSequenceImportFiles($sequence, $this->directories);
-
-		foreach ($files as $rollbackImportFile) {
-			$rollbackImportFile->rollback();
-			$io->writeln("\r<info> - Rolback file: " . $rollbackImportFile->getFile()->getBasename() . "</info>");
-		}
-
-		// Delete Migrations entries
-		$this->migrationRepository->deleteFromSequence($sequence);
-
-		$io->success('Successful rollback from ' . $sequence . ' to ' . ($sequence - 1));
+		self::$migration = $migration;
 
 		return $this;
 	}
@@ -306,6 +212,7 @@ class MigrationsManager
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
+
 				return [];
 			}
 
@@ -330,6 +237,18 @@ class MigrationsManager
 	}
 
 	/**
+	 * @return \string[]
+	 * @deprecated use getMigrationDirectories()
+	 *
+	 */
+	public function getDirectories()
+	{
+		return array_map(function (MigrationDirectory $migrationDirectory) {
+			return $migrationDirectory->getDirectory();
+		}, $this->directories);
+	}
+
+	/**
 	 * @param array|null $files
 	 *
 	 * @return array|null
@@ -343,6 +262,18 @@ class MigrationsManager
 		});
 
 		return $files;
+	}
+
+	/**
+	 * @param $basename
+	 *
+	 * @return string
+	 */
+	private function getFileIdentifier($basename)
+	{
+		preg_match('/V_(\d*)_.*/', $basename, $hits);
+
+		return !empty($hits) ? $hits[1] : false;
 	}
 
 	/**
@@ -413,18 +344,6 @@ class MigrationsManager
 	}
 
 	/**
-	 * @param $basename
-	 *
-	 * @return string
-	 */
-	private function getFileIdentifier($basename)
-	{
-		preg_match('/V_(\d*)_.*/', $basename, $hits);
-
-		return !empty($hits) ? $hits[1] : false;
-	}
-
-	/**
 	 * @param \Exception $exception
 	 * @param SymfonyStyle $io
 	 *
@@ -441,7 +360,7 @@ class MigrationsManager
 		$errorChoices = [
 			0 => 'Display Error',
 			1 => 'Ignore Error',
-			2 => 'Exit'
+			2 => 'Exit',
 		];
 
 		do {
@@ -463,13 +382,90 @@ class MigrationsManager
 	}
 
 	/**
-	 * @param bool $migration
+	 * @param SymfonyStyle $io
+	 * @param string $directory
 	 *
-	 * @return MigrationsManager
+	 * @return $this
+	 *
+	 * @throws \Exception
+	 * @throws \Throwable
 	 */
-	public function setMigration(bool $migration): MigrationsManager
+	public function migrateFull(SymfonyStyle $io, $directory = null)
 	{
-		self::$migration = $migration;
+		$this->setMigration(true);
+
+		/** @var MigrationRepository $repo */
+		$repo = $this->em->getRepository(Migration::class);
+
+		$io->warning('!!! FULL-MIGRATION !!!');
+		$io->title('Starting migrations, directories:');
+
+		/** @var ImportFile[] $files */
+		$files = $this->fetchFiles($io, $directory, function (string $directory) use ($repo): \Closure {
+
+			$doneMigrationIdentifiers = [];
+			foreach ($repo->getAllMigrationIdentifiers($this->directoryHelper->getCleanedPath($directory)) as $migration) {
+				$doneMigrationIdentifiers[] = $migration['identifier'];
+			}
+
+			return function (\SplFileInfo $file) use ($doneMigrationIdentifiers) {
+				if (
+					$this->getFileIdentifier($file->getBasename())
+					&& !in_array($this->getFileIdentifier($file->getBasename()), $doneMigrationIdentifiers)
+				) {
+					return true;
+				}
+
+				return false;
+			};
+		});
+
+		if ($files) {
+			$this->migrateFiles($io, $files);
+		} else {
+			$io->success('Everything is up to date.');
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @param SymfonyStyle $io
+	 *
+	 * @return $this
+	 *
+	 * @throws \Exception
+	 */
+	public function rollback(SymfonyStyle $io)
+	{
+		/** @var MigrationRepository $repo */
+		$repo = $this->em->getRepository(Migration::class);
+
+		$sequence = $repo->getLatestSequence();
+		$io->title('Rollback from sequence ' . $sequence . ' to ' . ($sequence - 1));
+
+		$sure = $io->ask('Are you sure you want to rollback?', true);
+
+		if (!$sure) {
+			$io->warning('Rollback skipped');
+
+			return $this;
+		}
+
+		// Get files for Sequence
+		/** @var ImportFile[] $files */
+		$files = $this->rollbackHelper->getSequenceImportFiles($sequence, $this->directories);
+
+		foreach ($files as $rollbackImportFile) {
+			$rollbackImportFile->rollback();
+			$io->writeln("\r<info> - Rolback file: " . $rollbackImportFile->getFile()->getBasename() . "</info>");
+		}
+
+		// Delete Migrations entries
+		$this->migrationRepository->deleteFromSequence($sequence);
+
+		$io->success('Successful rollback from ' . $sequence . ' to ' . ($sequence - 1));
+
 		return $this;
 	}
 }

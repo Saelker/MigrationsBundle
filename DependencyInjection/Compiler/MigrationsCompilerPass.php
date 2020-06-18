@@ -20,6 +20,7 @@ class MigrationsCompilerPass implements CompilerPassInterface
 
 	/**
 	 * MigrationsCompilerPass constructor.
+	 *
 	 * @param $directory
 	 * @param integer $priority
 	 */

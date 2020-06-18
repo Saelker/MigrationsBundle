@@ -35,6 +35,7 @@ class ImportFile
 
 	/**
 	 * ImportFile constructor.
+	 *
 	 * @param SplFileInfo $file
 	 * @param EntityManagerInterface $entityManager
 	 * @param ContainerInterface $container
@@ -44,14 +45,6 @@ class ImportFile
 		$this->file = $file;
 		$this->em = $entityManager;
 		$this->container = $container;
-	}
-
-	/**
-	 * @return SplFileInfo
-	 */
-	public function getFile()
-	{
-		return $this->file;
 	}
 
 	/**
@@ -67,28 +60,6 @@ class ImportFile
 		$instance->executeUp();
 
 		return $this;
-	}
-
-	/**
-	 * @return ImportFile
-	 */
-	public function rollback(): ImportFile
-	{
-		$instance = $this->getInstance();
-		$instance->down();
-
-		return $this;
-	}
-
-	/**
-	 * @return string|null
-	 */
-	public function getNote(): ?string
-	{
-		$pattern = '/const NOTE = "(.*)";/';
-		preg_match($pattern, $this->file->getContents(), $hits);
-
-		return !empty($hits) ? $hits[1] : null;
 	}
 
 	/**
@@ -128,6 +99,28 @@ class ImportFile
 	}
 
 	/**
+	 * @return ImportFile
+	 */
+	public function rollback(): ImportFile
+	{
+		$instance = $this->getInstance();
+		$instance->down();
+
+		return $this;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getNote(): ?string
+	{
+		$pattern = '/const NOTE = "(.*)";/';
+		preg_match($pattern, $this->file->getContents(), $hits);
+
+		return !empty($hits) ? $hits[1] : null;
+	}
+
+	/**
 	 * @return string|null
 	 */
 	public function getFileIdentifier(): ?string
@@ -143,6 +136,14 @@ class ImportFile
 	public function __toString(): string
 	{
 		return $this->getFile()->getBasename();
+	}
+
+	/**
+	 * @return SplFileInfo
+	 */
+	public function getFile()
+	{
+		return $this->file;
 	}
 
 }

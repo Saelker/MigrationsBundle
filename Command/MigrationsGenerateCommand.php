@@ -2,18 +2,50 @@
 
 namespace Saelker\MigrationsBundle\Command;
 
-use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\MigrationsManager;
+use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\GenerateMigration;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class MigrationsGenerateCommand extends ContainerAwareCommand
+class MigrationsGenerateCommand extends Command
 {
+	/**
+	 * @var MigrationsManager
+	 */
+	private $migrationsManager;
+
+	/**
+	 * @var DirectoryHelper
+	 */
+	private $directoryHelper;
+
+	/**
+	 * @var MigrationRepository
+	 */
+	private $migrationRepository;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param MigrationsManager $migrationsManager
+	 * @param DirectoryHelper $directoryHelper
+	 * @param MigrationRepository $migrationRepository
+	 */
+	public function __construct(MigrationsManager $migrationsManager,
+								DirectoryHelper $directoryHelper,
+								MigrationRepository $migrationRepository)
+	{
+		parent::__construct();
+
+		$this->migrationsManager = $migrationsManager;
+		$this->directoryHelper = $directoryHelper;
+		$this->migrationRepository = $migrationRepository;
+	}
+
 	/**
 	 * @inheritdoc
 	 */
@@ -29,25 +61,22 @@ class MigrationsGenerateCommand extends ContainerAwareCommand
 	/**
 	 * @param InputInterface $input
 	 * @param OutputInterface $output
+	 *
 	 * @return int|null|void
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$migrationsManager = $this->getContainer()->get(MigrationsManager::class);
-		$directoryHelper = $this->getContainer()->get(DirectoryHelper::class);
-		$repo = $this->getContainer()->get('doctrine.orm.default_entity_manager')->getRepository(Migration::class);
-
 		$io = new SymfonyStyle($input, $output);
 
 		$io->title('Generate a new migrations file');
 
-		$directory = $io->choice('Select a Directory', $directoryHelper->getSourceDirectories($migrationsManager->getDirectories()));
+		$directory = $io->choice('Select a Directory', $this->directoryHelper->getSourceDirectories($this->migrationsManager->getMigrationDirectories()));
 		$namespace = $io->ask('Namespace', GenerateMigration::getNamespaceFromDirectory($directory));
 		$description = $io->ask('Description');
 		$note = $io->ask('Note', false);
 
 		// Generate file
-		$file = GenerateMigration::generate($namespace, $repo->getNextIdentifier($directory), $description, $directory, $note);
+		$file = GenerateMigration::generate($namespace, $this->migrationRepository->getNextIdentifier($directory), $description, $directory, $note);
 
 		$io->success('Migration file was generated: ' . $file);
 	}
