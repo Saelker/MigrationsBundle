@@ -85,5 +85,7 @@ class MigrationsMigrateCommand extends Command
 		}
 
 		$this->migrationsManager->migrate($io, $directory);
+
+		return 0;
 	}
 }

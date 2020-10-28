@@ -79,5 +79,7 @@ class MigrationsGenerateCommand extends Command
 		$file = GenerateMigration::generate($namespace, $this->migrationRepository->getNextIdentifier($directory), $description, $directory, $note);
 
 		$io->success('Migration file was generated: ' . $file);
+
+		return 0;
 	}
 }

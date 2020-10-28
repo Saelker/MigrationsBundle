@@ -84,5 +84,7 @@ class MigrationsMigrateFullCommand extends Command
 		}
 
 		$this->migrationsManager->migrateFull($io, $directory);
+
+		return 0;
 	}
 }

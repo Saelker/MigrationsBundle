@@ -59,5 +59,7 @@ class MigrationsInfoCommand extends Command
 		}
 
 		$io->listing($directoryStrings);
+
+		return 0;
 	}
 }

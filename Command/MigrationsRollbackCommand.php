@@ -51,5 +51,7 @@ class MigrationsRollbackCommand extends Command
 	{
 		$io = new SymfonyStyle($input, $output);
 		$this->migrationsManager->rollback($io);
+
+		return 0;
 	}
 }
