@@ -2,6 +2,8 @@
 
 namespace Saelker\MigrationsBundle\Helper;
 
+use Saelker\MigrationsBundle\Util\MigrationDirectory;
+
 class DirectoryHelper
 {
 	/**
@@ -62,17 +64,19 @@ class DirectoryHelper
 	}
 
 	/**
-	 * @param array $directories
+	 * @param MigrationDirectory[] $directories
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getSourceDirectories(array $directories): array
 	{
 		$srcDirectories = [];
 
+		/** @var MigrationDirectory $directory */
 		foreach ($directories as $directory) {
-			if (strpos($directory, 'src') !== false) {
-				$srcDirectories[] = $directory;
+			$directoryName = $directory->getDirectory();
+			if (strpos($directoryName, 'src') !== false) {
+				$srcDirectories[] = $directoryName;
 			}
 		}
 

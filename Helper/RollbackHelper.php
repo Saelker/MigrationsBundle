@@ -62,6 +62,7 @@ class RollbackHelper
 			->getQueryBuilder()
 			->andWhere('m.sequence = :sequenceFilter')
 			->setParameter('sequenceFilter', $sequence)
+			->orderBy('m.identifier', 'DESC')
 			->getQuery()
 			->getResult();
 
