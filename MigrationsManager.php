@@ -8,7 +8,7 @@ use Saelker\MigrationsBundle\Helper\DependencyHelper;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Helper\RollbackHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
 use Symfony\Component\Console\Style\SymfonyStyle;
