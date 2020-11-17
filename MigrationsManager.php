@@ -60,21 +60,21 @@ class MigrationsManager
 	 * MigrationsManager constructor.
 	 *
 	 * @param EntityManagerInterface $em
-	 * @param ContainerInterface $container
+	 * @param KernelInterface $kernel
 	 * @param DependencyHelper $dependencyHelper
 	 * @param DirectoryHelper $directoryHelper
 	 * @param RollbackHelper $rollbackHelper
 	 * @param MigrationRepository $migrationRepository
 	 */
 	public function __construct(EntityManagerInterface $em,
-								ContainerInterface $container,
+								KernelInterface $kernel,
 								DependencyHelper $dependencyHelper,
 								DirectoryHelper $directoryHelper,
 								RollbackHelper $rollbackHelper,
 								MigrationRepository $migrationRepository)
 	{
 		$this->em = $em;
-		$this->container = $container;
+		$this->container = $kernel->getContainer();
 		$this->dependencyHelper = $dependencyHelper;
 		$this->directoryHelper = $directoryHelper;
 		$this->rollbackHelper = $rollbackHelper;

@@ -32,15 +32,15 @@ class RollbackHelper
 	 *
 	 * @param MigrationRepository $migrationRepository
 	 * @param EntityManagerInterface $em
-	 * @param ContainerInterface $container
+	 * @param KernelInterface $kernel
 	 */
 	public function __construct(MigrationRepository $migrationRepository,
 								EntityManagerInterface $em,
-								ContainerInterface $container)
+								KernelInterface $kernel)
 	{
 		$this->repository = $migrationRepository;
 		$this->em = $em;
-		$this->container = $container;
+		$this->container = $kernel->getContainer();
 	}
 
 	/**
