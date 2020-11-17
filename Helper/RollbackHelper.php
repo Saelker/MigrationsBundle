@@ -7,6 +7,7 @@ use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 
