@@ -122,7 +122,7 @@ class MigrationRepository extends ServiceEntityRepository
 
 
 		if ($finder->getIterator()->current()) {
-			$lastFile = new ImportFile($finder->getIterator()->current(), null, null);
+			$lastFile = new ImportFile($finder->getIterator()->current(), null, null, null);
 			$newNumber = substr($lastFile->getFileIdentifier(), 0, -3) == $currentIdentifier ? intval(substr($lastFile->getFileIdentifier(), -3)) + 1 : 1;
 		} else {
 			$newNumber = 1;

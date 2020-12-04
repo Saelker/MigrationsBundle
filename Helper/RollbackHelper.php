@@ -29,6 +29,11 @@ class RollbackHelper
 	private $container;
 
 	/**
+	 * @var KernelInterface
+	 */
+	private $kernel;
+
+	/**
 	 * RollbackHelper constructor.
 	 *
 	 * @param MigrationRepository $migrationRepository
@@ -42,6 +47,7 @@ class RollbackHelper
 		$this->repository = $migrationRepository;
 		$this->em = $em;
 		$this->container = $kernel->getContainer();
+		$this->kernel = $kernel;
 	}
 
 	/**
@@ -85,7 +91,7 @@ class RollbackHelper
 			$finder->files()->name('V_' . $migration->getIdentifier() . '*');
 
 			foreach ($finder->in($useDirectory) as $file) {
-				$rollbackFiles[] = new ImportFile($file, $this->em, $this->container);
+				$rollbackFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container);
 			}
 		}
 
