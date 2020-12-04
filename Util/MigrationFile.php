@@ -50,7 +50,7 @@ abstract class MigrationFile
 	/**
 	 * @var KernelInterface
 	 */
-	private $kernel;
+	protected $kernel;
 
 	/**
 	 * MigrationFile constructor.
