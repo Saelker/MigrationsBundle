@@ -56,6 +56,10 @@ class MigrationsManager
 	 * @var MigrationRepository
 	 */
 	private $migrationRepository;
+	/**
+	 * @var KernelInterface
+	 */
+	private $kernel;
 
 	/**
 	 * MigrationsManager constructor.
@@ -80,6 +84,7 @@ class MigrationsManager
 		$this->directoryHelper = $directoryHelper;
 		$this->rollbackHelper = $rollbackHelper;
 		$this->migrationRepository = $migrationRepository;
+		$this->kernel = $kernel;
 	}
 
 	/**
@@ -209,7 +214,7 @@ class MigrationsManager
 				$finder->filter($filterFn($directory));
 
 				foreach ($finder as $file) {
-					$tempFiles[] = new ImportFile($file, $this->em, $this->container);
+					$tempFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
