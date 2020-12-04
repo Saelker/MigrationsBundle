@@ -15,38 +15,47 @@ abstract class MigrationFile
 	 * @var EntityManagerInterface
 	 */
 	protected $em;
+
 	/**
 	 * @var ContainerInterface
 	 */
 	protected $container;
+
 	/**
 	 * @var ConnectionHelper
 	 */
 	protected $connectionHelper;
+
 	/**
 	 * @var string|null
 	 */
 	protected $dependency;
+
 	/**
 	 * @var string|null
 	 */
 	protected $dependencyResolution;
+
 	/**
 	 * @var int
 	 */
 	protected $migrationOrder = 0;
+
 	/**
 	 * @var SqlStatement[]
 	 */
 	private $sqlStatements = [];
+
 	/**
 	 * @var string[][]
 	 */
 	private $classes = [];
+
 	/**
 	 * @var Schema
 	 */
 	private $fromSchema;
+
 	/**
 	 * @var KernelInterface
 	 */
