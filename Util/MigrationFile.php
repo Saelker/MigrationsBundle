@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 abstract class MigrationFile
 {
@@ -46,18 +47,24 @@ abstract class MigrationFile
 	 * @var Schema
 	 */
 	private $fromSchema;
+	/**
+	 * @var KernelInterface
+	 */
+	private $kernel;
 
 	/**
 	 * MigrationFile constructor.
 	 *
+	 * @param KernelInterface $kernel
 	 * @param EntityManagerInterface $em
 	 * @param ContainerInterface $container
 	 */
-	public function __construct(EntityManagerInterface $em, ContainerInterface $container)
+	public function __construct(KernelInterface $kernel, EntityManagerInterface $em, ContainerInterface $container)
 	{
 		$this->em = $em;
 		$this->container = $container;
 		$this->connectionHelper = $container->get(ConnectionHelper::class);
+		$this->kernel = $kernel;
 
 		$this->init();
 	}
