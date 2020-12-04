@@ -8,6 +8,7 @@ use Saelker\MigrationsBundle\Helper\DependencyHelper;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Helper\RollbackHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -60,21 +61,21 @@ class MigrationsManager
 	 * MigrationsManager constructor.
 	 *
 	 * @param EntityManagerInterface $em
-	 * @param ContainerInterface $container
+	 * @param KernelInterface $kernel
 	 * @param DependencyHelper $dependencyHelper
 	 * @param DirectoryHelper $directoryHelper
 	 * @param RollbackHelper $rollbackHelper
 	 * @param MigrationRepository $migrationRepository
 	 */
 	public function __construct(EntityManagerInterface $em,
-								ContainerInterface $container,
+								KernelInterface $kernel,
 								DependencyHelper $dependencyHelper,
 								DirectoryHelper $directoryHelper,
 								RollbackHelper $rollbackHelper,
 								MigrationRepository $migrationRepository)
 	{
 		$this->em = $em;
-		$this->container = $container;
+		$this->container = $kernel->getContainer();
 		$this->dependencyHelper = $dependencyHelper;
 		$this->directoryHelper = $directoryHelper;
 		$this->rollbackHelper = $rollbackHelper;

@@ -7,6 +7,7 @@ use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 
@@ -32,15 +33,15 @@ class RollbackHelper
 	 *
 	 * @param MigrationRepository $migrationRepository
 	 * @param EntityManagerInterface $em
-	 * @param ContainerInterface $container
+	 * @param KernelInterface $kernel
 	 */
 	public function __construct(MigrationRepository $migrationRepository,
 								EntityManagerInterface $em,
-								ContainerInterface $container)
+								KernelInterface $kernel)
 	{
 		$this->repository = $migrationRepository;
 		$this->em = $em;
-		$this->container = $container;
+		$this->container = $kernel->getContainer();
 	}
 
 	/**
