@@ -2,8 +2,6 @@
 
 namespace Saelker\MigrationsBundle\Util;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\ORMException;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -39,10 +37,10 @@ abstract class MigrationFile
 
 	protected KernelInterface $kernel;
 
-	public function __construct(KernelInterface $kernel,
+	public function __construct(KernelInterface        $kernel,
 								EntityManagerInterface $em,
-								ContainerInterface $container,
-								ConnectionHelper $connectionHelper)
+								ContainerInterface     $container,
+								ConnectionHelper       $connectionHelper)
 	{
 		$this->em = $em;
 		$this->container = $container;
@@ -144,7 +142,6 @@ abstract class MigrationFile
 
 			$meta[] = $metaData;
 		}
-
 
 		return $meta;
 	}

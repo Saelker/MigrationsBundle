@@ -16,7 +16,7 @@ class ImportFile implements \Stringable
 								private readonly ?KernelInterface        $kernel,
 								private readonly ?EntityManagerInterface $em,
 								private readonly ?ContainerInterface     $container,
-								private readonly ?ConnectionHelper        $connectionHelper)
+								private readonly ?ConnectionHelper       $connectionHelper)
 	{
 	}
 
@@ -83,10 +83,7 @@ class ImportFile implements \Stringable
 		return $this->getFile()->getBasename();
 	}
 
-	/**
-	 * @return SplFileInfo
-	 */
-	public function getFile()
+	public function getFile(): SplFileInfo
 	{
 		return $this->file;
 	}
