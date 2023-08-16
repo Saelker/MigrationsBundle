@@ -81,7 +81,7 @@ abstract class MigrationFile
 	{
 		foreach ($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
-			$stmt->executeStatement($sql->getParams());
+			$stmt->execute($sql->getParams());
 
 			unset($this->sqlStatements[$key]);
 		}
