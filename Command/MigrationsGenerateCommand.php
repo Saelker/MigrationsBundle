@@ -13,58 +13,17 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsGenerateCommand extends Command
 {
-	/**
-	 * @var MigrationsManager
-	 */
-	private $migrationsManager;
+	protected static $defaultName = 'saelker:migrations:generate';
+	protected static $defaultDescription = 'Generate a new migrations file';
 
-	/**
-	 * @var DirectoryHelper
-	 */
-	private $directoryHelper;
-
-	/**
-	 * @var MigrationRepository
-	 */
-	private $migrationRepository;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param MigrationsManager $migrationsManager
-	 * @param DirectoryHelper $directoryHelper
-	 * @param MigrationRepository $migrationRepository
-	 */
-	public function __construct(MigrationsManager $migrationsManager,
-								DirectoryHelper $directoryHelper,
-								MigrationRepository $migrationRepository)
+	public function __construct(private readonly MigrationsManager $migrationsManager,
+								private readonly DirectoryHelper $directoryHelper,
+								private readonly MigrationRepository $migrationRepository)
 	{
 		parent::__construct();
-
-		$this->migrationsManager = $migrationsManager;
-		$this->directoryHelper = $directoryHelper;
-		$this->migrationRepository = $migrationRepository;
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	protected function configure()
-	{
-		parent::configure();
-
-		$this
-			->setName('saelker:migrations:generate')
-			->setDescription('Generate a new migrations file');
-	}
-
-	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 *
-	 * @return int|null|void
-	 */
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$io = new SymfonyStyle($input, $output);
 
@@ -80,6 +39,6 @@ class MigrationsGenerateCommand extends Command
 
 		$io->success('Migration file was generated: ' . $file);
 
-		return 0;
+		return Command::SUCCESS;
 	}
 }

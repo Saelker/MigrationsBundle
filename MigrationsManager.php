@@ -4,136 +4,64 @@ namespace Saelker\MigrationsBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Saelker\MigrationsBundle\Entity\Migration;
+use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Saelker\MigrationsBundle\Helper\DependencyHelper;
 use Saelker\MigrationsBundle\Helper\DirectoryHelper;
 use Saelker\MigrationsBundle\Helper\RollbackHelper;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Saelker\MigrationsBundle\Util\ImportFile;
 use Saelker\MigrationsBundle\Util\MigrationDirectory;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class MigrationsManager
 {
 	/**
 	 * To check if symfony is loaded in migration mode
-	 *
-	 * @var bool
 	 */
 	public static $migration = false;
 	/**
-	 * @var EntityManagerInterface
-	 */
-	private $em;
-	/**
 	 * @var MigrationDirectory[]
 	 */
-	private $directories;
-	/**
-	 * @var ContainerInterface
-	 */
-	private $container;
-	/**
-	 * @var DependencyHelper
-	 */
-	private $dependencyHelper;
-	/**
-	 * @var DirectoryHelper
-	 */
-	private $directoryHelper;
-	/**
-	 * @var bool
-	 */
-	private $scopeDirectories;
-	/**
-	 * @var RollbackHelper
-	 */
-	private $rollbackHelper;
+	private array $directories = [];
+	private ContainerInterface $container;
+	private ?bool $scopeDirectories = null;
+	private readonly KernelInterface $kernel;
 
-	/**
-	 * @var MigrationRepository
-	 */
-	private $migrationRepository;
-	/**
-	 * @var KernelInterface
-	 */
-	private $kernel;
-
-	/**
-	 * MigrationsManager constructor.
-	 *
-	 * @param EntityManagerInterface $em
-	 * @param KernelInterface $kernel
-	 * @param DependencyHelper $dependencyHelper
-	 * @param DirectoryHelper $directoryHelper
-	 * @param RollbackHelper $rollbackHelper
-	 * @param MigrationRepository $migrationRepository
-	 */
-	public function __construct(EntityManagerInterface $em,
-								KernelInterface $kernel,
-								DependencyHelper $dependencyHelper,
-								DirectoryHelper $directoryHelper,
-								RollbackHelper $rollbackHelper,
-								MigrationRepository $migrationRepository)
+	public function __construct(private readonly EntityManagerInterface $em,
+								private readonly DependencyHelper       $dependencyHelper,
+								private readonly DirectoryHelper        $directoryHelper,
+								private readonly RollbackHelper         $rollbackHelper,
+								private readonly MigrationRepository    $migrationRepository,
+								private readonly ConnectionHelper       $connectionHelper,
+								KernelInterface                         $kernel)
 	{
-		$this->em = $em;
-		$this->container = $kernel->getContainer();
-		$this->dependencyHelper = $dependencyHelper;
-		$this->directoryHelper = $directoryHelper;
-		$this->rollbackHelper = $rollbackHelper;
-		$this->migrationRepository = $migrationRepository;
 		$this->kernel = $kernel;
+		$this->container = $kernel->getContainer();
 	}
 
-	/**
-	 * @param \string $directory
-	 * @param integer $priority
-	 *
-	 * @return $this
-	 */
-	public function addDirectory($directory, $priority = null)
+	public function addDirectory($directory, $priority = null): static
 	{
 		$this->directories[] = new MigrationDirectory($directory, $priority);
 
-		usort($this->directories, function (MigrationDirectory $a, MigrationDirectory $b) {
-			if ($a->getPriority() == $b->getPriority()) {
-				return 0;
-			}
-
-			return ($a->getPriority() < $b->getPriority()) ? -1 : 1;
-		});
+		usort($this->directories, static fn(MigrationDirectory $a, MigrationDirectory $b): int => $a->getPriority() <=> $b->getPriority());
 
 		return $this;
 	}
 
-	/**
-	 * @param bool $scopeDirectories
-	 */
 	public function setScopeDirectories(bool $scopeDirectories): void
 	{
 		$this->scopeDirectories = $scopeDirectories;
 	}
 
-	/**
-	 * @return MigrationDirectory[]
-	 */
-	public function getMigrationDirectories()
+	public function getMigrationDirectories(): array
 	{
 		return $this->directories;
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 * @param string $directory
-	 *
-	 * @return $this
-	 *
-	 * @throws \Exception
-	 * @throws \Throwable
-	 */
-	public function migrate(SymfonyStyle $io, $directory = null)
+	public function migrate(SymfonyStyle $io, string $directory = null): static
 	{
 		$this->setMigration(true);
 
@@ -147,11 +75,11 @@ class MigrationsManager
 
 			try {
 				$latestMigration = $repo->getLatestMigration($this->directoryHelper->getCleanedPath($directory));
-			} catch (\Exception $e) {
+			} catch (\Exception) {
 				$latestMigration = null;
 			}
 
-			return function (\SplFileInfo $file) use ($latestMigration) {
+			return function (\SplFileInfo $file) use ($latestMigration): bool {
 				if (
 					$this->getFileIdentifier($file->getBasename())
 					&& (!$latestMigration || $this->getFileIdentifier($file->getBasename()) > $latestMigration->getIdentifier())
@@ -172,11 +100,6 @@ class MigrationsManager
 		return $this;
 	}
 
-	/**
-	 * @param bool $migration
-	 *
-	 * @return MigrationsManager
-	 */
 	public function setMigration(bool $migration): MigrationsManager
 	{
 		self::$migration = $migration;
@@ -184,13 +107,6 @@ class MigrationsManager
 		return $this;
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 * @param null|string $directory
-	 * @param \Closure $filterFn
-	 *
-	 * @return array
-	 */
 	private function fetchFiles(SymfonyStyle $io, ?string $directory, \Closure $filterFn): array
 	{
 		/** @var ImportFile[] $files */
@@ -214,7 +130,7 @@ class MigrationsManager
 				$finder->filter($filterFn($directory));
 
 				foreach ($finder as $file) {
-					$tempFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container);
+					$tempFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);
@@ -234,62 +150,33 @@ class MigrationsManager
 		if (!$this->scopeDirectories) {
 			$files = array_unique($files);
 
-			usort($files, function (ImportFile $x, ImportFile $y) {
-				return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
-			});
+			usort($files, fn(ImportFile $x, ImportFile $y): int => strcmp((string)$x->getFileIdentifier(), (string)$y->getFileIdentifier()));
 		}
 
 		return $files;
 	}
 
-	/**
-	 * @return \string[]
-	 * @deprecated use getMigrationDirectories()
-	 *
-	 */
-	public function getDirectories()
+	public function getDirectories(): array
 	{
-		return array_map(function (MigrationDirectory $migrationDirectory) {
-			return $migrationDirectory->getDirectory();
-		}, $this->directories);
+		return array_map(static fn(MigrationDirectory $migrationDirectory) => $migrationDirectory->getDirectory(), $this->directories);
 	}
 
-	/**
-	 * @param array|null $files
-	 *
-	 * @return array|null
-	 */
 	private function sortAndFilterFiles(?array $files): ?array
 	{
 		$files = array_unique($files);
 
-		usort($files, function (ImportFile $x, ImportFile $y) {
-			return strcmp($x->getFileIdentifier(), $y->getFileIdentifier());
-		});
+		usort($files, fn(ImportFile $x, ImportFile $y): int => strcmp((string)$x->getFileIdentifier(), (string)$y->getFileIdentifier()));
 
 		return $files;
 	}
 
-	/**
-	 * @param $basename
-	 *
-	 * @return string
-	 */
-	private function getFileIdentifier($basename)
+	private function getFileIdentifier($basename): bool|string
 	{
-		preg_match('/V_(\d*)_.*/', $basename, $hits);
+		preg_match('/V_(\d*)_.*/', (string)$basename, $hits);
 
 		return !empty($hits) ? $hits[1] : false;
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 * @param array $files
-	 *
-	 * @throws \Exception
-	 *
-	 * @throws \Throwable
-	 */
 	private function migrateFiles(SymfonyStyle $io, array $files): void
 	{
 		/** @var MigrationRepository $repo */
@@ -346,18 +233,11 @@ class MigrationsManager
 				$io->note($note);
 			}
 		}
-
 	}
 
-	/**
-	 * @param \Exception $exception
-	 * @param SymfonyStyle $io
-	 *
-	 * @throws \Exception
-	 */
-	private function handleError(\Exception $exception, SymfonyStyle $io)
+	private function handleError(\Exception $exception, SymfonyStyle $io): void
 	{
-		if (php_sapi_name() !== 'cli') {
+		if (PHP_SAPI !== 'cli') {
 			throw new \Exception($exception);
 		}
 
@@ -383,20 +263,10 @@ class MigrationsManager
 					$io->warning('Exit migration');
 					exit;
 			}
-
-		} while ($selectedChoice != 'Ignore Error');
+		} while ($selectedChoice !== 'Ignore Error');
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 * @param string $directory
-	 *
-	 * @return $this
-	 *
-	 * @throws \Exception
-	 * @throws \Throwable
-	 */
-	public function migrateFull(SymfonyStyle $io, $directory = null)
+	public function migrateFull(SymfonyStyle $io, string $directory = null): static
 	{
 		$this->setMigration(true);
 
@@ -414,7 +284,7 @@ class MigrationsManager
 				$doneMigrationIdentifiers[] = $migration['identifier'];
 			}
 
-			return function (\SplFileInfo $file) use ($doneMigrationIdentifiers) {
+			return function (\SplFileInfo $file) use ($doneMigrationIdentifiers): bool {
 				if (
 					$this->getFileIdentifier($file->getBasename())
 					&& !in_array($this->getFileIdentifier($file->getBasename()), $doneMigrationIdentifiers)
@@ -435,14 +305,7 @@ class MigrationsManager
 		return $this;
 	}
 
-	/**
-	 * @param SymfonyStyle $io
-	 *
-	 * @return $this
-	 *
-	 * @throws \Exception
-	 */
-	public function rollback(SymfonyStyle $io)
+	public function rollback(SymfonyStyle $io): static
 	{
 		/** @var MigrationRepository $repo */
 		$repo = $this->em->getRepository(Migration::class);

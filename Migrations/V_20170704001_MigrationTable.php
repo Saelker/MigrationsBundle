@@ -7,15 +7,15 @@ use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_20170704001_MigrationTable extends MigrationFile
 {
-	private $table = 'migration';
+	private const TABLE = "migration";
 
-	public function up()
+	public function up(): void
 	{
-		if (!$this->connectionHelper->tablesExists($this->table)) {
+		if (!$this->connectionHelper->tablesExists([self::TABLE])) {
 
 			$schema = new Schema();
 
-			$table = $schema->createTable($this->table);
+			$table = $schema->createTable(self::TABLE);
 
 			$table->addColumn('id', 'integer', ['autoincrement' => true]);
 			$table->addColumn('identifier', 'string');

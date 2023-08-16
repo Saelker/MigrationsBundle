@@ -3,69 +3,24 @@
 namespace Saelker\MigrationsBundle\Util;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-/**
- * Class ImportFile
- *
- * @package Saelker\MigrationsBundle\Util
- */
-class ImportFile
+class ImportFile implements \Stringable
 {
-	/**
-	 * @var SplFileInfo
-	 */
-	private $file;
+	private ?object $instance = null;
 
-	/**
-	 * @var MigrationFile
-	 */
-	private $instance;
-
-	/**
-	 * @var EntityManagerInterface
-	 */
-	private $em;
-
-	/**
-	 * @var ContainerInterface
-	 */
-	private $container;
-
-	/**
-	 * @var KernelInterface|null
-	 */
-	private $kernel;
-
-	/**
-	 * ImportFile constructor.
-	 *
-	 * @param SplFileInfo $file
-	 * @param KernelInterface|null $kernel
-	 * @param EntityManagerInterface|null $entityManager
-	 * @param ContainerInterface|null $container
-	 */
-	public function __construct(SplFileInfo $file,
-								?KernelInterface $kernel,
-								?EntityManagerInterface $entityManager,
-								?ContainerInterface $container)
+	public function __construct(private readonly SplFileInfo             $file,
+								private readonly ?KernelInterface        $kernel,
+								private readonly ?EntityManagerInterface $em,
+								private readonly ?ContainerInterface     $container,
+								private readonly ?ConnectionHelper        $connectionHelper)
 	{
-		$this->file = $file;
-		$this->em = $entityManager;
-		$this->container = $container;
-		$this->kernel = $kernel;
 	}
 
-	/**
-	 * @return ImportFile
-	 *
-	 * @throws \Exception
-	 *
-	 * @throws \Throwable
-	 */
-	public function migrate(): ImportFile
+	public function migrate(): static
 	{
 		$instance = $this->getInstance();
 		$instance->executeUp();
@@ -73,23 +28,17 @@ class ImportFile
 		return $this;
 	}
 
-	/**
-	 * @return MigrationFile
-	 */
 	public function getInstance(): MigrationFile
 	{
 		if (!$this->instance) {
 			$class = $this->getNamespace() . "\\" . $this->getClassName();
 
-			$this->instance = new $class($this->kernel, $this->em, $this->container);
+			$this->instance = new $class($this->kernel, $this->em, $this->container, $this->connectionHelper);
 		}
 
 		return $this->instance;
 	}
 
-	/**
-	 * @return string|null
-	 */
 	private function getNamespace(): ?string
 	{
 		$pattern = "/namespace (.*);/";
@@ -98,9 +47,6 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : null;
 	}
 
-	/**
-	 * @return string|null
-	 */
 	private function getClassName(): ?string
 	{
 		$pattern = "/class (\w*)/";
@@ -109,9 +55,6 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : null;
 	}
 
-	/**
-	 * @return ImportFile
-	 */
 	public function rollback(): ImportFile
 	{
 		$instance = $this->getInstance();
@@ -120,9 +63,6 @@ class ImportFile
 		return $this;
 	}
 
-	/**
-	 * @return string|null
-	 */
 	public function getNote(): ?string
 	{
 		$pattern = '/const NOTE = "(.*)";/';
@@ -131,9 +71,6 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : null;
 	}
 
-	/**
-	 * @return string|null
-	 */
 	public function getFileIdentifier(): ?string
 	{
 		preg_match('/V_(\d*)_.*/', $this->file->getBasename(), $hits);
@@ -141,9 +78,6 @@ class ImportFile
 		return !empty($hits) ? $hits[1] : null;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function __toString(): string
 	{
 		return $this->getFile()->getBasename();

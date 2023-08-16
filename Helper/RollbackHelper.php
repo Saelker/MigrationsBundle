@@ -6,58 +6,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use Saelker\MigrationsBundle\Entity\Migration;
 use Saelker\MigrationsBundle\Repository\MigrationRepository;
 use Saelker\MigrationsBundle\Util\ImportFile;
-use Saelker\MigrationsBundle\Util\MigrationDirectory;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class RollbackHelper
 {
-	/**
-	 * @var MigrationRepository
-	 */
-	private $repository;
+	private ContainerInterface $container;
 
-	/**
-	 * @var EntityManagerInterface
-	 */
-	private $em;
-
-	/**
-	 * @var ContainerInterface
-	 */
-	private $container;
-
-	/**
-	 * @var KernelInterface
-	 */
-	private $kernel;
-
-	/**
-	 * RollbackHelper constructor.
-	 *
-	 * @param MigrationRepository $migrationRepository
-	 * @param EntityManagerInterface $em
-	 * @param KernelInterface $kernel
-	 */
-	public function __construct(MigrationRepository $migrationRepository,
-								EntityManagerInterface $em,
-								KernelInterface $kernel)
+	public function __construct(private readonly MigrationRepository    $repository,
+								private readonly EntityManagerInterface $em,
+								private readonly KernelInterface        $kernel,
+								private readonly ConnectionHelper       $connectionHelper)
 	{
-		$this->repository = $migrationRepository;
-		$this->em = $em;
 		$this->container = $kernel->getContainer();
-		$this->kernel = $kernel;
 	}
 
-	/**
-	 * @param int $sequence
-	 * @param MigrationDirectory[] $directories
-	 *
-	 * @return ImportFile[]
-	 *
-	 * @throws \Exception
-	 */
 	public function getSequenceImportFiles(int $sequence, array $directories): array
 	{
 		/** @var ImportFile[] $rollbackFiles */
@@ -91,7 +55,7 @@ class RollbackHelper
 			$finder->files()->name('V_' . $migration->getIdentifier() . '*');
 
 			foreach ($finder->in($useDirectory) as $file) {
-				$rollbackFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container);
+				$rollbackFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper);
 			}
 		}
 

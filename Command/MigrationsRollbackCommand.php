@@ -10,48 +10,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsRollbackCommand extends Command
 {
-	/**
-	 * @var MigrationsManager
-	 */
-	private $migrationsManager;
+	protected static $defaultName = 'saelker:migrations:rollback';
+	protected static $defaultDescription = 'Rollback to last version';
 
-	/**
-	 * Constructor.
-	 *
-	 * @param MigrationsManager $migrationsManager
-	 */
-	public function __construct(MigrationsManager $migrationsManager)
+	public function __construct(private readonly MigrationsManager $migrationsManager)
 	{
 		parent::__construct();
-		$this->migrationsManager = $migrationsManager;
 	}
 
-
-	/**
-	 * @inheritdoc
-	 */
-	protected function configure()
-	{
-		parent::configure();
-
-		$this
-			->setName('saelker:migrations:rollback')
-			->setDescription('Rollback to last version');
-	}
-
-	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 *
-	 * @return int|null|void
-	 *
-	 * @throws \Exception
-	 */
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$io = new SymfonyStyle($input, $output);
 		$this->migrationsManager->rollback($io);
 
-		return 0;
+		return Command::SUCCESS;
 	}
 }

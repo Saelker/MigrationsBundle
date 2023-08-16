@@ -7,7 +7,7 @@ use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_20170910001_OnlySlashesInTable extends MigrationFile
 {
-	public function up()
+	public function up(): void
 	{
 		$migrations = $this->em->getRepository(Migration::class)->findAll();
 

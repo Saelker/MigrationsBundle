@@ -12,35 +12,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsMigrateFullCommand extends Command
 {
-	/**
-	 * @var MigrationsManager
-	 */
-	private $migrationsManager;
+	protected static $defaultDescription = 'Starts developer migrations';
 
-	/**
-	 * @var DirectoryHelper
-	 */
-	private $directoryHelper;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param MigrationsManager $migrationsManager
-	 * @param DirectoryHelper $directoryHelper
-	 */
-	public function __construct(MigrationsManager $migrationsManager,
-								DirectoryHelper $directoryHelper)
+	public function __construct(private readonly MigrationsManager $migrationsManager,
+								private readonly DirectoryHelper $directoryHelper)
 	{
 		parent::__construct();
-
-		$this->migrationsManager = $migrationsManager;
-		$this->directoryHelper = $directoryHelper;
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		parent::configure();
 
@@ -57,20 +37,10 @@ class MigrationsMigrateFullCommand extends Command
 				null,
 				InputOption::VALUE_OPTIONAL,
 				'will be used for initial installation',
-				'')
-			->setDescription('Starts developer migrations');
+				'');
 	}
 
-	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 *
-	 * @return int|null|void
-	 *
-	 * @throws \Exception
-	 * @throws \Throwable
-	 */
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$io = new SymfonyStyle($input, $output);
 
@@ -85,6 +55,6 @@ class MigrationsMigrateFullCommand extends Command
 
 		$this->migrationsManager->migrateFull($io, $directory);
 
-		return 0;
+		return Command::SUCCESS;
 	}
 }

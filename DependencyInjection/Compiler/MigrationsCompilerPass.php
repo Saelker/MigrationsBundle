@@ -8,29 +8,14 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class MigrationsCompilerPass implements CompilerPassInterface
 {
-	/**
-	 * @var
-	 */
-	private $directory;
-
-	/**
-	 * @var integer
-	 */
-	private $priority;
-
-	/**
-	 * MigrationsCompilerPass constructor.
-	 *
-	 * @param $directory
-	 * @param integer $priority
-	 */
-	public function __construct($directory, $priority = null)
+	public function __construct(
+		private $directory,
+		private $priority = null
+	)
 	{
-		$this->directory = $directory;
-		$this->priority = $priority;
 	}
 
-	public function process(ContainerBuilder $container)
+	public function process(ContainerBuilder $container): void
 	{
 		$container->getDefinition(MigrationsManager::class)->addMethodCall('addDirectory', [$this->directory, $this->priority]);
 	}

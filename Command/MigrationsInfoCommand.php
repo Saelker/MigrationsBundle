@@ -10,42 +10,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class MigrationsInfoCommand extends Command
 {
-	/**
-	 * @var MigrationsManager
-	 */
-	private $migrationsManager;
+	protected static $defaultName = 'saelker:migrations:info';
+	protected static $defaultDescription = 'Show infos from migrations manager';
 
-	/**
-	 * Constructor.
-	 *
-	 * @param MigrationsManager $migrationsManager
-	 */
-	public function __construct(MigrationsManager $migrationsManager)
+	public function __construct(private readonly MigrationsManager $migrationsManager)
 	{
 		parent::__construct();
-
-		$this->migrationsManager = $migrationsManager;
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	protected function configure()
-	{
-		parent::configure();
-
-		$this
-			->setName('saelker:migrations:info')
-			->setDescription('Show infos from migrations manager');
-	}
-
-	/**
-	 * @param InputInterface $input
-	 * @param OutputInterface $output
-	 *
-	 * @return int|null|void
-	 */
-	protected function execute(InputInterface $input, OutputInterface $output)
+	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
 		$io = new SymfonyStyle($input, $output);
 
@@ -60,6 +33,6 @@ class MigrationsInfoCommand extends Command
 
 		$io->listing($directoryStrings);
 
-		return 0;
+		return Command::SUCCESS;
 	}
 }

@@ -2,6 +2,8 @@
 
 namespace Saelker\MigrationsBundle\Util;
 
+use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\ORMException;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
@@ -11,91 +13,53 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 abstract class MigrationFile
 {
-	/**
-	 * @var EntityManagerInterface
-	 */
-	protected $em;
+	protected EntityManagerInterface $em;
 
-	/**
-	 * @var ContainerInterface
-	 */
-	protected $container;
+	protected ContainerInterface $container;
 
-	/**
-	 * @var ConnectionHelper
-	 */
-	protected $connectionHelper;
+	protected ConnectionHelper $connectionHelper;
 
-	/**
-	 * @var string|null
-	 */
-	protected $dependency;
+	protected ?string $dependency = null;
 
-	/**
-	 * @var string|null
-	 */
-	protected $dependencyResolution;
+	protected ?string $dependencyResolution = null;
 
-	/**
-	 * @var int
-	 */
-	protected $migrationOrder = 0;
+	protected int $migrationOrder = 0;
 
 	/**
 	 * @var SqlStatement[]
 	 */
-	private $sqlStatements = [];
+	private array $sqlStatements = [];
 
 	/**
 	 * @var string[][]
 	 */
-	private $classes = [];
+	private array $classes = [];
 
-	/**
-	 * @var Schema
-	 */
-	private $fromSchema;
+	private ?Schema $fromSchema = null;
 
-	/**
-	 * @var KernelInterface
-	 */
-	protected $kernel;
+	protected KernelInterface $kernel;
 
-	/**
-	 * MigrationFile constructor.
-	 *
-	 * @param KernelInterface $kernel
-	 * @param EntityManagerInterface $em
-	 * @param ContainerInterface $container
-	 */
-	public function __construct(KernelInterface $kernel, EntityManagerInterface $em, ContainerInterface $container)
+	public function __construct(KernelInterface $kernel,
+								EntityManagerInterface $em,
+								ContainerInterface $container,
+								ConnectionHelper $connectionHelper)
 	{
 		$this->em = $em;
 		$this->container = $container;
-		$this->connectionHelper = $container->get(ConnectionHelper::class);
 		$this->kernel = $kernel;
+		$this->connectionHelper = $connectionHelper;
 
 		$this->init();
 	}
 
-	/**
-	 *
-	 */
 	public function init(): void
 	{
 	}
 
-	/**
-	 * @return MigrationFile
-	 *
-	 * @throws \Exception
-	 *
-	 * @throws \Throwable
-	 */
-	public function executeUp(): MigrationFile
+	public function executeUp(): static
 	{
 		// Execute all statements in transaction
-		$this->em->getConnection()->transactional(function () {
+		$this->em->getConnection()->transactional(function (): void {
 			$this->connectionHelper->resetEntityManager();
 
 			$this->preUp();
@@ -109,28 +73,17 @@ abstract class MigrationFile
 		return $this;
 	}
 
-	/**
-	 *
-	 */
-	public function preUp()
+	public function preUp(): void
 	{
 	}
 
-	/**
-	 *
-	 */
 	abstract public function up();
 
-	/**
-	 * @return MigrationFile
-	 *
-	 * @throws \Doctrine\DBAL\DBALException
-	 */
-	private function executeSql(): MigrationFile
+	private function executeSql(): static
 	{
 		foreach ($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
-			$stmt->execute($sql->getParams());
+			$stmt->executeStatement($sql->getParams());
 
 			unset($this->sqlStatements[$key]);
 		}
@@ -146,21 +99,10 @@ abstract class MigrationFile
 		return $this->sqlStatements;
 	}
 
-	/**
-	 *
-	 */
-	public function postUp()
+	public function postUp(): void
 	{
 	}
 
-	/**
-	 * @param Schema $schema
-	 *
-	 * @return MigrationFile
-	 *
-	 * @throws \Doctrine\ORM\ORMException
-	 * @throws \Doctrine\DBAL\DBALException
-	 */
 	public function addSchema(Schema $schema): MigrationFile
 	{
 		$fromSchema = $this->getFromSchema();
@@ -173,11 +115,6 @@ abstract class MigrationFile
 		return $this;
 	}
 
-	/**
-	 * @return Schema
-	 *
-	 * @throws \Doctrine\ORM\ORMException
-	 */
 	public function getFromSchema(): Schema
 	{
 		if (!$this->fromSchema) {
@@ -188,9 +125,6 @@ abstract class MigrationFile
 		return $this->fromSchema;
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getTableMetadata(): array
 	{
 		$meta = [];
@@ -215,94 +149,54 @@ abstract class MigrationFile
 		return $meta;
 	}
 
-	/**
-	 * @param $sql
-	 * @param null $params
-	 *
-	 * @return MigrationFile
-	 */
-	public function addSql($sql, $params = null): MigrationFile
+	public function addSql($sql, $params = null): static
 	{
 		$this->sqlStatements[] = new SqlStatement($sql, $params);
 
 		return $this;
 	}
 
-	/**
-	 * @param $class
-	 *
-	 * @return MigrationFile
-	 */
-	public function addClass($class): MigrationFile
+	public function addClass($class): static
 	{
 		$this->classes[] = $class;
 
 		return $this;
 	}
 
-	/**
-	 * @return Schema
-	 *
-	 * @throws \Doctrine\ORM\ORMException
-	 */
 	public function getSchema(): Schema
 	{
 		return clone $this->getFromSchema();
 	}
 
-	/**
-	 * @return null|string
-	 */
 	public function getDependency(): ?string
 	{
 		return $this->dependency;
 	}
 
-	/**
-	 * @param null|string $dependency
-	 *
-	 * @return MigrationFile
-	 */
-	public function setDependency(?string $dependency): MigrationFile
+	public function setDependency(?string $dependency): static
 	{
 		$this->dependency = $dependency;
 
 		return $this;
 	}
 
-	/**
-	 * @return null|string
-	 */
 	public function getDependencyResolution(): ?string
 	{
 		return $this->dependencyResolution;
 	}
 
-	/**
-	 * @param null|string $dependencyResolution
-	 *
-	 * @return MigrationFile
-	 */
-	public function setDependencyResolution(?string $dependencyResolution): MigrationFile
+	public function setDependencyResolution(?string $dependencyResolution): static
 	{
 		$this->dependencyResolution = $dependencyResolution;
 
 		return $this;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getMigrationOrder(): int
 	{
 		return $this->migrationOrder;
 	}
 
-	/**
-	 * @param int $migrationOrder
-	 *
-	 * @return MigrationFile
-	 */
 	public function setMigrationOrder(int $migrationOrder): MigrationFile
 	{
 		$this->migrationOrder = $migrationOrder;
@@ -310,17 +204,11 @@ abstract class MigrationFile
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getClassName(): string
 	{
 		return static::class;
 	}
 
-	/**
-	 * Will execute the down function for given migrations
-	 */
 	public function down(): void
 	{
 

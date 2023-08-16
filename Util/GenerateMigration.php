@@ -4,10 +4,7 @@ namespace Saelker\MigrationsBundle\Util;
 
 class GenerateMigration
 {
-	/**
-	 * @var string
-	 */
-	private static $template =
+	private static string $template =
 		'<?php
 
 namespace <namespace>;
@@ -16,23 +13,19 @@ use Saelker\MigrationsBundle\Util\MigrationFile;
 
 class V_<identifier>_<description> extends MigrationFile
 {
-	const NOTE = "<note>";
+	public const NOTE = "<note>";
 	
-	public function up()
+	public function up(): void
 	{
 		
 	}
+	
+	public function down(): void
+	{
+	
+	}
 }';
 
-	/**
-	 * @param string $namespace
-	 * @param string $identifier
-	 * @param string $description
-	 * @param string $directory
-	 * @param string $note
-	 *
-	 * @return string
-	 */
 	public static function generate(string $namespace, string $identifier, string $description, string $directory, string $note): string
 	{
 		$description = self::toCamelCase($description);
@@ -61,33 +54,23 @@ class V_<identifier>_<description> extends MigrationFile
 		return $path;
 	}
 
-	/**
-	 * @param string $string
-	 *
-	 * @return string
-	 */
 	private static function toCamelCase(string $string): string
 	{
-		$string = str_replace('-', ' ', $string);
-		$string = str_replace('_', ' ', $string);
+		$string = str_replace(['-', '_'], ' ', $string);
 		$string = ucwords(strtolower($string));
-		$string = str_replace(' ', '', $string);
 
-		return $string;
+		return str_replace(' ', '', $string);
 	}
 
-	/**
-	 * @param string $directory
-	 *
-	 * @return null|string
-	 */
 	public static function getNamespaceFromDirectory(string $directory): ?string
 	{
 		$directories = explode('/', $directory);
 		$key = array_search('src', $directories);
 
+		$directoryCount = count($directories);
 		$namespace = [];
-		for ($i = $key + 1; $i < count($directories); $i++) {
+
+		for ($i = $key + 1; $i < $directoryCount; $i++) {
 			$namespace[] = $directories[$i];
 		}
 

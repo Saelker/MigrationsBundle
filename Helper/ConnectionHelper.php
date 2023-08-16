@@ -3,35 +3,17 @@
 namespace Saelker\MigrationsBundle\Helper;
 
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 
 class ConnectionHelper
 {
-	/**
-	 * @var EntityManager
-	 */
-	private $em;
+	private AbstractSchemaManager $schemaManager;
 
-	/**
-	 * @var AbstractSchemaManager
-	 */
-	private $schemaManager;
-
-	/**
-	 * ConnectionHelper constructor.
-	 *
-	 * @param EntityManagerInterface $entityManager
-	 */
-	public function __construct(EntityManagerInterface $entityManager)
+	public function __construct(private EntityManagerInterface $em)
 	{
-		$this->em = $entityManager;
-		$this->schemaManager = $entityManager->getConnection()->getSchemaManager();
+		$this->schemaManager = $em->getConnection()->getSchemaManager();
 	}
 
-	/**
-	 * @throws \Doctrine\ORM\ORMException
-	 */
 	public function resetEntityManager(): void
 	{
 		$this->em = $this->em->create(
@@ -42,22 +24,11 @@ class ConnectionHelper
 		$this->em->clear();
 	}
 
-	/**
-	 * @param $tables
-	 *
-	 * @return bool
-	 */
 	public function tablesExists($tables): bool
 	{
 		return $this->schemaManager->tablesExist($tables);
 	}
 
-	/**
-	 * @param string $table
-	 * @param string $column
-	 *
-	 * @return bool
-	 */
 	public function hasColumn(string $table, string $column): bool
 	{
 		$tableColumns = $this->schemaManager->listTableColumns($table);
