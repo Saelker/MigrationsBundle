@@ -54,7 +54,7 @@ abstract class MigrationFile
 	{
 	}
 
-	public function executeUp(): static
+	public function executeUp(): MigrationFile
 	{
 		// Execute all statements in transaction
 		$this->em->getConnection()->transactional(function (): void {
@@ -71,13 +71,13 @@ abstract class MigrationFile
 		return $this;
 	}
 
-	public function preUp(): void
+	public function preUp()
 	{
 	}
 
 	abstract public function up();
 
-	private function executeSql(): static
+	private function executeSql(): MigrationFile
 	{
 		foreach ($this->getSqlStatements() as $key => $sql) {
 			$stmt = $this->em->getConnection()->prepare($sql->getSql());
@@ -97,7 +97,7 @@ abstract class MigrationFile
 		return $this->sqlStatements;
 	}
 
-	public function postUp(): void
+	public function postUp()
 	{
 	}
 
@@ -146,7 +146,7 @@ abstract class MigrationFile
 		return $meta;
 	}
 
-	public function addSql($sql, $params = null): static
+	public function addSql($sql, $params = null): MigrationFile
 	{
 		$this->sqlStatements[] = new SqlStatement($sql, $params);
 
@@ -170,7 +170,7 @@ abstract class MigrationFile
 		return $this->dependency;
 	}
 
-	public function setDependency(?string $dependency): static
+	public function setDependency(?string $dependency): MigrationFile
 	{
 		$this->dependency = $dependency;
 
@@ -182,7 +182,7 @@ abstract class MigrationFile
 		return $this->dependencyResolution;
 	}
 
-	public function setDependencyResolution(?string $dependencyResolution): static
+	public function setDependencyResolution(?string $dependencyResolution): MigrationFile
 	{
 		$this->dependencyResolution = $dependencyResolution;
 
