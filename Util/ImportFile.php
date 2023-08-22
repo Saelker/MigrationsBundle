@@ -7,6 +7,7 @@ use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class ImportFile implements \Stringable
 {
@@ -16,7 +17,8 @@ class ImportFile implements \Stringable
 								private readonly ?KernelInterface        $kernel,
 								private readonly ?EntityManagerInterface $em,
 								private readonly ?ContainerInterface     $container,
-								private readonly ?ConnectionHelper       $connectionHelper)
+								private readonly ?ConnectionHelper       $connectionHelper,
+								private readonly ?NormalizerInterface    $normalizer)
 	{
 	}
 
@@ -33,7 +35,7 @@ class ImportFile implements \Stringable
 		if (!$this->instance) {
 			$class = $this->getNamespace() . "\\" . $this->getClassName();
 
-			$this->instance = new $class($this->kernel, $this->em, $this->container, $this->connectionHelper);
+			$this->instance = new $class($this->kernel, $this->em, $this->container, $this->connectionHelper, $this->normalizer);
 		}
 
 		return $this->instance;

@@ -80,7 +80,7 @@ class MigrationRepository extends ServiceEntityRepository
 			->sort($sort);
 
 		if ($finder->getIterator()->current()) {
-			$lastFile = new ImportFile($finder->getIterator()->current(), null, null, null, null);
+			$lastFile = new ImportFile($finder->getIterator()->current(), null, null, null, null, null);
 			$newNumber = substr($lastFile->getFileIdentifier(), 0, -3) == $currentIdentifier ? (int)substr($lastFile->getFileIdentifier(), -3) + 1 : 1;
 		} else {
 			$newNumber = 1;

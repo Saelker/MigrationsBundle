@@ -15,6 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class MigrationsManager
 {
@@ -36,6 +37,7 @@ class MigrationsManager
 								private readonly RollbackHelper         $rollbackHelper,
 								private readonly MigrationRepository    $migrationRepository,
 								private readonly ConnectionHelper       $connectionHelper,
+								private readonly NormalizerInterface    $normalizer,
 								KernelInterface                         $kernel)
 	{
 		$this->kernel = $kernel;
@@ -130,7 +132,7 @@ class MigrationsManager
 				$finder->filter($filterFn($directory));
 
 				foreach ($finder as $file) {
-					$tempFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper);
+					$tempFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper, $this->normalizer);
 				}
 			} else {
 				$io->error('Directory not found: ' . $directory);

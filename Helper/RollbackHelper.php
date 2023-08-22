@@ -9,6 +9,7 @@ use Saelker\MigrationsBundle\Util\ImportFile;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class RollbackHelper
 {
@@ -17,7 +18,8 @@ class RollbackHelper
 	public function __construct(private readonly MigrationRepository    $repository,
 								private readonly EntityManagerInterface $em,
 								private readonly KernelInterface        $kernel,
-								private readonly ConnectionHelper       $connectionHelper)
+								private readonly ConnectionHelper       $connectionHelper,
+								private readonly NormalizerInterface    $normalizer)
 	{
 		$this->container = $kernel->getContainer();
 	}
@@ -55,7 +57,7 @@ class RollbackHelper
 			$finder->files()->name('V_' . $migration->getIdentifier() . '*');
 
 			foreach ($finder->in($useDirectory) as $file) {
-				$rollbackFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper);
+				$rollbackFiles[] = new ImportFile($file, $this->kernel, $this->em, $this->container, $this->connectionHelper, $this->normalizer);
 			}
 		}
 

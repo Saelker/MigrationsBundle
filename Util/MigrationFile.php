@@ -8,6 +8,7 @@ use Doctrine\ORM\Tools\SchemaTool;
 use Saelker\MigrationsBundle\Helper\ConnectionHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 abstract class MigrationFile
 {
@@ -16,6 +17,8 @@ abstract class MigrationFile
 	protected ContainerInterface $container;
 
 	protected ConnectionHelper $connectionHelper;
+
+	protected ?NormalizerInterface $normalizer = null;
 
 	protected ?string $dependency = null;
 
@@ -40,12 +43,14 @@ abstract class MigrationFile
 	public function __construct(KernelInterface        $kernel,
 								EntityManagerInterface $em,
 								ContainerInterface     $container,
-								ConnectionHelper       $connectionHelper)
+								ConnectionHelper       $connectionHelper,
+								?NormalizerInterface   $normalizer = null)
 	{
 		$this->em = $em;
 		$this->container = $container;
 		$this->kernel = $kernel;
 		$this->connectionHelper = $connectionHelper;
+		$this->normalizer = $normalizer;
 
 		$this->init();
 	}
